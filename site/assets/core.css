@@ -598,3 +598,17 @@ header nav a{position:relative}header nav a::after{content:"";position:absolute;
 .sp-x{position:absolute;top:14px;inset-inline-start:14px;z-index:3;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.9);cursor:pointer;font-size:1rem;box-shadow:var(--shadow)}
 @media (max-width:640px){.sp-p{grid-template-columns:1fr}.sp-ph{min-height:220px}}
 @media (prefers-reduced-motion:reduce){.sm .s.f,.pw,.rr,.plan .fb,.w{animation:none!important;opacity:1!important;transform:none!important}}
+/* ===== الرئيسية المختصرة ===== */
+.today{max-width:1280px;margin:26px auto 0;padding-inline:16px;display:grid;grid-template-columns:repeat(3,1fr);border-block:1px solid var(--line)}
+.today>div{padding:20px 22px;border-inline-start:1px solid var(--line)}.today>div:first-child{border-inline-start:0}
+.today small{display:block;color:var(--muted);font-weight:700;margin-bottom:4px}.today b{font-size:1.5rem;color:var(--brand2)}
+.paths{max-width:1280px;margin:40px auto 10px;padding-inline:16px}.paths h2{margin:0 0 14px;font-size:1.6rem}
+.path{display:grid;grid-template-columns:54px 56px 1fr 44px;gap:18px;align-items:center;padding:22px 10px;border-bottom:1px solid var(--line);color:var(--ink);text-decoration:none;position:relative;overflow:hidden;transition:padding .35s}
+.path:first-of-type{border-top:2px solid var(--ink)}
+.path::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--c0b),transparent);transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.2,.7,.2,1)}
+.path:hover{padding-inline-start:26px}.path:hover::before{transform:scaleX(1)}.path>*{position:relative}
+.path .pn{font-size:1.6rem;font-weight:800;color:color-mix(in srgb,var(--brand) 30%,#fff)}
+.path .pi{width:56px;height:56px;border-radius:18px;display:grid;place-items:center;background:var(--grad);box-shadow:0 10px 18px rgba(15,138,148,.3)}.path .pi .ico{stroke:#fff;width:26px;height:26px}
+.path .pt b{display:block;font-size:1.35rem}.path .pt small{color:var(--ink2);font-size:.95rem}
+.path .pa .ico{width:26px;height:26px;color:var(--brand);transition:transform .35s}.path:hover .pa .ico{transform:translateX(-8px)}
+@media (max-width:640px){.today{grid-template-columns:1fr}.today>div{border-inline-start:0;border-top:1px solid var(--line)}.path{grid-template-columns:44px 1fr 30px}.path .pn{display:none}}
