@@ -38,3 +38,22 @@ async function renderData() {
   pubReveal();
 }
 function pubReveal() { const els = document.querySelectorAll(".rv:not(.in)"); if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("in")); return; } const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.1 }); els.forEach((e) => io.observe(e)); }
+
+let _pp;
+function loadStaff() { return (_pp ||= fetch(APP_CONFIG.supabaseUrl + "/rest/v1/rpc/public_staff", { method: "POST", headers: { apikey: APP_CONFIG.supabaseKey, "content-type": "application/json" }, body: "{}" }).then((r) => (r.ok ? r.json() : null)).catch(() => null)); }
+async function renderPeople() {
+  const root = document.getElementById("people-root"), o = await loadStaff();
+  if (!o || !o.published) { root.innerHTML = `<div class="card empty"><div class="big">${ico("lock")}</div><h3>قائمة المنسوبين غير منشورة حالياً</h3><p class="sub">تظهر هذه الصفحة حين تفعّل إدارة المدرسة النشر العام.</p></div>`; return; }
+  const L = o.staff || [], cnt = (c) => L.filter((x) => x.category === c).length;
+  const spec = [...new Set(L.map((x) => x.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
+  root.innerHTML = `<div class="kstrip2">${[["users", L.length, "إجمالي المنشورين", 0], ["cap", cnt("teaching"), "الهيئة التعليمية", 1], ["building", cnt("administrative"), "الهيئة الإدارية", 3], ["grid", cnt("support"), "الهيئة المساندة", 2]].map(([i, v, n, k]) => `<div class="kpi k${k}"><div class="ic">${ico(i)}</div><div><b data-n="${v}">0</b><span>${n}</span></div></div>`).join("")}</div>
+    <div class="bar mt2"><input id="pq" placeholder="ابحث بالاسم أو التخصص"><select id="pc"><option value="">كل الفئات</option>${Object.entries(PUBX).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select><select id="ps"><option value="">كل التخصصات</option>${spec.map((x) => `<option>${pesc(x)}</option>`).join("")}</select></div>
+    <div class="grid pgrid" id="pgrid"></div><p class="sub mt" id="pcount"></p><p class="sub">تُنشر الأسماء والوظائف والتخصصات لمن وافقت الإدارة على إظهاره فقط، دون أي بيانات تواصل أو بيانات شخصية. آخر تحديث: ${pdate(o.generated_at)}.</p>`;
+  root.querySelectorAll("[data-n]").forEach((e) => animateTo(e, +e.dataset.n));
+  const ini = (n) => (n.trim()[0] || "").toString();
+  const draw = () => { const q = document.getElementById("pq").value.trim(), c = document.getElementById("pc").value, s = document.getElementById("ps").value;
+    const r = L.filter((x) => (!q || x.name.includes(q) || (x.specialty || "").includes(q)) && (!c || x.category === c) && (!s || x.specialty === s));
+    document.getElementById("pgrid").innerHTML = r.map((x) => `<div class="card person ${x.leader ? "lead" : ""}"><div class="av">${pesc(ini(x.name))}</div><div><b>${pesc(x.name)}</b><div class="role">${pesc(x.job_title || PUBX[x.category] || "")}</div><div class="meta2">${x.specialty ? `<span>${pesc(x.specialty)}</span>` : ""}<span>${pesc(PUBX[x.category] || "")}</span></div></div></div>`).join("") || '<p class="sub">لا توجد نتائج مطابقة.</p>';
+    document.getElementById("pcount").textContent = `${r.length} من ${L.length} منسوب`; };
+  ["pq", "pc", "ps"].forEach((i) => (document.getElementById(i).oninput = draw)); draw();
+}

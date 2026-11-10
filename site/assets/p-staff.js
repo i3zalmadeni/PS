@@ -31,7 +31,7 @@ boot("staff.html", async (m, c) => {
   function draw() {
     const list = filtered();
     m.querySelector("#tb").innerHTML = list.map((r) => `<tr><td>${esc(r.full_name)}</td><td>${esc(r.staff_categories?.name_ar)}</td><td>${esc(r.job_titles?.name_ar)}</td><td>${esc(r.specialty || "—")}</td><td>${esc(r.department || "—")}</td>
-      <td><span class="badge ${r.employment_status === "active" ? "ok" : ""}">${L.emp[r.employment_status] || "—"}</span></td>
+      <td><span class="badge ${r.employment_status === "active" ? "ok" : ""}">${L.emp[r.employment_status] || "—"}</span>${r.publish_public ? ' <span class="badge" title="يظهر في الموقع العام">منشور</span>' : ""}</td>
       <td class="acts"><button class="btn sm sec" data-d="${r.id}">التفاصيل</button>${canEdit ? `<button class="btn sm sec" data-e="${r.id}">تعديل</button>` : ""}${c.isAdmin ? `<button class="btn sm sec" data-a="${r.id}">الحساب</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="7">لا توجد نتائج.</td></tr>';
     m.querySelector("#cnt").textContent = `${list.length} من ${rows.length} منسوب`;
   }
@@ -57,6 +57,7 @@ boot("staff.html", async (m, c) => {
       <div><label>الحالة الوظيفية</label><select name="employment_status">${opts(L.emp, r?.employment_status || "active")}</select></div>
       <div><label>تاريخ الانضمام</label><input type="date" name="joined_on" value="${esc(r?.joined_on || today())}"></div>
       <div><label>الصورة (اختياري)</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></div>
+      <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} style="width:auto"> إظهار الاسم والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)</label></div>
       ${canContact ? `<div><label>الرقم الوظيفي</label><input name="employee_no" value="${esc(p.employee_no)}"></div><div><label>البريد الإلكتروني</label><input type="email" name="email" value="${esc(p.email)}"></div><div><label>الجوال</label><input name="phone" value="${esc(p.phone)}"></div>` : ""}
       </div><p class="err" id="fe2"></p><div class="acts mt"><button class="btn">حفظ</button><button type="button" class="btn sec" id="cx">إلغاء</button></div></form>`);
     const f = md.el.querySelector("#sf"), cat = f.category, jt = f.job_title;
@@ -65,7 +66,7 @@ boot("staff.html", async (m, c) => {
     f.onsubmit = async (e) => {
       e.preventDefault(); const v = Object.fromEntries(new FormData(f)), err = md.el.querySelector("#fe2"); err.textContent = "";
       const id = r?.id || crypto.randomUUID();
-      const base = { full_name: v.full_name.trim(), category: v.category, job_title: v.job_title, specialty: nn(v.specialty), qualification: nn(v.qualification), department: nn(v.department), employment_status: v.employment_status, joined_on: v.joined_on || today() };
+      const base = { full_name: v.full_name.trim(), category: v.category, job_title: v.job_title, specialty: nn(v.specialty), qualification: nn(v.qualification), department: nn(v.department), employment_status: v.employment_status, joined_on: v.joined_on || today(), publish_public: f.publish_public.checked };
       try {
         const file = f.photo.files[0]; if (file) base.photo_path = await uploadMedia("personnel", id, file);
         const res = r ? await sb.from("staff_members").update(base).eq("id", id) : await sb.from("staff_members").insert({ ...base, id, created_by: c.uid });

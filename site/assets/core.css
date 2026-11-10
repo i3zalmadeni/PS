@@ -215,3 +215,9 @@ nav .ico,.dnav .ico{width:18px;height:18px;margin-inline-end:8px;flex:none;trans
 .empty .big{display:grid;place-items:center;color:var(--brand)}.empty .big .ico{width:46px;height:46px}
 .fac .meta .ico{width:14px;height:14px;vertical-align:-2px;margin-inline-end:4px}
 .hero .tag .ico{stroke:#fff}.btn .tg .ico{width:17px;height:17px}
+.pgrid{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.person{display:flex;gap:14px;align-items:center;padding:14px}
+.person .av{width:46px;height:46px;border-radius:14px;flex:none;display:grid;place-items:center;font-weight:800;font-size:1.2rem;color:#fff;background:var(--grad)}
+.person.lead .av{background:linear-gradient(135deg,#f6c25e,#eaa83a);color:#3b2a06}
+.person b{display:block;line-height:1.35}.person .role{color:var(--brand2);font-size:.86rem;font-weight:700}
+.person .meta2{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.person .meta2 span{background:var(--soft);color:var(--ink2);border-radius:99px;padding:1px 10px;font-size:.76rem}
