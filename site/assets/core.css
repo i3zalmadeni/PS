@@ -182,3 +182,6 @@ header .top .moe{order:3;flex:none}
 @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}}
 .lgi{display:grid;place-items:center;margin-bottom:8px}.lgi .core-ic{width:84px}.login h2,.login .sub{text-align:center}
 .steps .card b{display:block;margin-bottom:4px;color:var(--brand2);font-weight:800}
+.bm .ci-ring{animation-duration:26s}.bm .ci-orb{animation-duration:9s}
+.core-ic{filter:drop-shadow(0 14px 26px rgba(7,40,50,.3))}
+.bm svg{width:54px;height:54px}
