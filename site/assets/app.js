@@ -22,7 +22,7 @@ const badge = (st) => `<span class="badge ${STATUS_CLASS[st] || ""}">${esc(STATU
 const isReviewer = (u) => ["system_admin", "principal", "coordinator"].includes(u.role);
 
 const NAV = [
-  ["home.html", "الرئيسية"], ["teachers.html", "المعلمون"], ["profile.html", "ملفي المهني"],
+  ["dashboard.html", "لوحة التحكم", "reviewer"], ["home.html", "الرئيسية"], ["teachers.html", "المعلمون"], ["profile.html", "ملفي المهني"],
   ["growth.html", "النمو المهني"], ["achievements.html", "الإنجازات والشواهد"],
   ["review.html", "مراجعة الاعتمادات", "reviewer"],
   ["admin-users.html", "إدارة المعلمين", "reviewer"],
@@ -65,3 +65,11 @@ async function boot(page, render) {
   try { await render(me, main); } catch (e) { console.error(e); main.innerHTML = `<p class="err">تعذر تحميل الصفحة.</p>`; }
 }
 const header = (t, s) => `<h2 class="title">${esc(t)}</h2>${s ? `<p class="sub">${esc(s)}</p>` : ""}`;
+
+/** صفحة الوصول بعد الدخول بحسب الدور: لوحة التحكم للمدير والإدارة، والرئيسية للمعلم. */
+async function landing() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return "login.html";
+  const { data: r } = await sb.from("users").select("role").eq("id", session.user.id).maybeSingle();
+  return ["system_admin", "principal", "coordinator"].includes(r?.role) ? "dashboard.html" : "home.html";
+}

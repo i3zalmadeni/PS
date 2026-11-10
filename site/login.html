@@ -15,13 +15,13 @@
 
 const q = new URLSearchParams(location.search);
 if (q.get("e") === "inactive") document.getElementById("m").textContent = "الحساب غير مفعّل. تواصل مع المنسق.";
-sb.auth.getSession().then(({ data }) => { if (data.session) location.replace("home.html"); });
+sb.auth.getSession().then(({ data }) => { if (data.session) landing().then((u) => location.replace(u)); });
 document.getElementById("f").onsubmit = async (ev) => {
   ev.preventDefault(); const m = document.getElementById("m"), b = document.getElementById("b"); m.textContent = ""; b.disabled = true;
   const { error } = await sb.auth.signInWithPassword({ email: e.value.trim(), password: p.value });
   b.disabled = false;
   if (error) { m.textContent = "بيانات الدخول غير صحيحة."; return; }
-  location.replace("home.html");
+  landing().then((u) => location.replace(u));
 };
 document.getElementById("fg").onclick = async (ev) => {
   ev.preventDefault(); const m = document.getElementById("m");

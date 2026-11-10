@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>لوحة التحكم – مجتمع المعلمين الذكي</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/compat.css"><link rel="stylesheet" href="assets/site.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/app.js"></script><script src="assets/footer.js"></script>
+</head><body class="pub pg"><div id="shell"></div><script>
+const AXIS = { knowledge_development: "المعرفة والتطوير", application_practice: "التطبيق والممارسة", impact_results: "الأثر والنتائج", professional_participation: "المشاركة المهنية", general: "مؤشرات عامة" };
+const ROLE_OPTS = [["system_admin", "مدير النظام"], ["principal", "مدير المدرسة"], ["coordinator", "منسق النمو المهني"], ["teacher", "معلم"]];
+const PENDING = [["achievements", "status", "إنجازات", "review.html"], ["evidence_files", "status", "شواهد", "review.html"], ["teaching_practices", "verification_status", "ممارسات", "review.html"], ["teacher_skills", "verification_status", "مهارات", "review.html"], ["initiatives", "verification_status", "مبادرات", "review.html"], ["teacher_qualifications", "verification_status", "مؤهلات", "review.html"]];
+const ACT = { approved_record_edited: "تعديل سجل معتمد", review_record: "قرار مراجعة", role_changed: "تغيير دور" };
+
+boot("dashboard.html", async (me, main) => {
+  if (!isReviewer(me)) { location.replace("home.html"); return; }
+  const isAdmin = me.role === "system_admin";
+  main.innerHTML = header(isAdmin ? "لوحة تحكم مدير النظام" : "لوحة الإدارة التعليمية", isAdmin ? "إدارة المستخدمين والصلاحيات ومتابعة المنظومة والمؤشرات." : "متابعة الاعتمادات ومؤشرات النمو المهني في المدرسة.") + `
+  <div class="stats" id="kp"></div>
+  <div class="cols"><div>
+    <div class="card"><div class="row"><h3 style="margin:0">بانتظار قرارك</h3><a class="btn sec" href="review.html">فتح المراجعة</a></div><div id="pend" style="margin-top:10px"></div></div>
+    <div class="card"><div class="row"><h3 style="margin:0">مؤشرات المدرسة</h3><label style="margin:0">العام <input type="text" id="yr" value="1448-1449" style="width:110px" dir="ltr"></label></div>
+      <p class="muted">الأرقام الاسمية مع المقام ومصدرها. «لا بيانات» تعني عدم توفر البيانات وليست صفرًا. مؤشرات تطويرية وليست تقويمًا للأداء.</p><div id="ind"></div></div>
+  </div><div>
+    <div class="card"><h3 style="margin-top:0">وصول سريع</h3><div style="display:grid;gap:8px">
+      <a class="btn" href="admin-users.html">إضافة معلمين واستيراد Excel</a><a class="btn sec" href="review.html">مراجعة الاعتمادات</a><a class="btn sec" href="teachers.html">دليل المعلمين</a><a class="btn sec" href="index.html" target="_blank" rel="noopener">الموقع العام</a></div></div>
+    <div class="card"><h3 style="margin-top:0">سلامة البيانات</h3><div id="hl"><span class="muted">جارٍ الفحص…</span></div></div>
+  </div></div>
+  ${isAdmin ? `<div class="card"><div class="row"><h3 style="margin:0">المستخدمون والصلاحيات</h3><input type="text" id="uq" placeholder="بحث بالبريد…" style="max-width:240px" aria-label="بحث"></div><div id="us" style="overflow:auto;margin-top:10px"></div><p id="um" class="err" role="alert"></p></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(320px,1fr))"><div class="card" style="margin:0"><h3 style="margin-top:0">آخر العمليات الحساسة</h3><div id="au"></div></div><div class="card" style="margin:0"><h3 style="margin-top:0">آخر عمليات الاستيراد</h3><div id="ij"></div></div></div>` : ""}`;
+
+  const cnt = async (t, f) => { let q = sb.from(t).select("id", { count: "exact", head: true }); q = f ? f(q) : q; const { count } = await q; return count ?? 0; };
+  // بطاقات سريعة
+  const [teachers, accounts, active, practices] = await Promise.all([cnt("teachers"), cnt("users", (q) => q.eq("status", "active")), cnt("teachers", (q) => q.not("user_id", "is", null)), cnt("teaching_practices", (q) => q.eq("verification_status", "approved"))]);
+  kp.innerHTML = [[teachers, "معلمًا مسجلًا"], [active, "معلمًا لديه حساب"], [accounts, "حسابًا نشطًا"], [practices, "ممارسة معتمدة"]].map(([n, l]) => `<div class="stat"><b>${n}</b><span>${l}</span></div>`).join("");
+
+  // الاعتمادات المعلقة
+  const pend = await Promise.all(PENDING.map(async ([t, c, l]) => [l, await cnt(t, (q) => q.in(c, ["submitted", "under_review"]))]));
+  const tot = pend.reduce((s, [, n]) => s + n, 0);
+  document.getElementById("pend").innerHTML = `<p style="font-size:1.4rem;margin:0"><b>${tot}</b> <span class="muted" style="font-size:.9rem">طلب بانتظار المراجعة</span></p>` + pend.filter(([, n]) => n).map(([l, n]) => `<span class="badge warn" style="margin:4px 0 0 6px">${esc(l)}: ${n}</span>`).join("") + (tot ? "" : '<p class="muted">لا توجد طلبات معلقة.</p>');
+
+  // المؤشرات
+  async function loadInd() {
+    const y = yr.value.trim(); ind.innerHTML = '<span class="muted">جارٍ التحميل…</span>';
+    const [v, d] = await Promise.all([sb.rpc("school_indicators", { p_year: y }), sb.from("indicator_definitions").select("code,name,axis,source_note").eq("is_active", true)]);
+    if (v.error || d.error) { ind.innerHTML = '<p class="err">تعذر تحميل المؤشرات.</p>'; return; }
+    const by = new Map((v.data || []).map((r) => [r.code, r])); const groups = {};
+    (d.data || []).forEach((x) => { (groups[x.axis] ||= []).push(x); });
+    ind.innerHTML = Object.entries(groups).map(([ax, list]) => `<h4 style="margin:14px 0 6px">${esc(AXIS[ax] || ax)}</h4>` + list.map((x) => { const r = by.get(x.code) || {};
+      const has = r.value != null, pct = has && r.denominator ? Math.round(r.value) : null;
+      return `<div style="margin:10px 0"><div class="row"><span>${esc(x.name)}</span><b>${has ? esc(String(Math.round(r.value * 10) / 10)) + (r.denominator ? "%" : "") : '<span class="muted">لا بيانات</span>'}</b></div>
+        ${pct != null ? `<div class="bar"><i style="width:${Math.min(100, pct)}%"></i></div>` : ""}<div class="muted">${has && r.denominator != null ? `${r.numerator} من ${r.denominator} • ` : ""}السجلات: ${r.record_count ?? 0} • المصدر: ${esc(x.source_note || "—")}</div></div>`; }).join("")).join("") || '<p class="muted">لا تعريفات مؤشرات.</p>'; }
+  yr.onchange = loadInd; loadInd();
+
+  // سلامة البيانات
+  const [noAcc, noTeacher, inactive] = await Promise.all([cnt("teachers", (q) => q.is("user_id", null).eq("is_active", true)), sb.from("users").select("id,role").then(async (r) => { const ids = new Set(((await sb.from("teachers").select("user_id").not("user_id", "is", null)).data || []).map((x) => x.user_id)); return (r.data || []).filter((u) => u.role === "teacher" && !ids.has(u.id)).length; }), cnt("users", (q) => q.eq("status", "suspended"))]);
+  hl.innerHTML = [[noAcc, "معلمون بلا حساب", "أضفهم أو فعّل حساباتهم من صفحة إدارة المعلمين"], [noTeacher, "حسابات معلمين بلا ملف", "اربطها بملف معلم"], [inactive, "حسابات موقوفة", ""]]
+    .map(([n, l, h]) => `<p style="margin:6px 0"><span class="badge ${n ? "warn" : "ok"}">${n}</span> ${esc(l)}${n && h ? `<br><span class="muted">${esc(h)}</span>` : ""}</p>`).join("");
+
+  if (!isAdmin) return;
+  // المستخدمون
+  let users = [];
+  async function loadUsers() {
+    const [u, t] = await Promise.all([sb.from("users").select("id,email,role,status,created_at").order("created_at"), sb.from("teachers").select("user_id,full_name").not("user_id", "is", null)]);
+    const nm = new Map((t.data || []).map((x) => [x.user_id, x.full_name])); users = (u.data || []).map((x) => ({ ...x, name: nm.get(x.id) || "—" })); drawUsers(); }
+  function drawUsers() { const q = (uq.value || "").trim().toLowerCase(), r = users.filter((x) => !q || x.email.toLowerCase().includes(q) || x.name.includes(q));
+    us.innerHTML = `<table style="width:100%"><tr><th>الاسم</th><th>البريد</th><th>الدور</th><th>الحالة</th></tr>${r.map((x) => `<tr style="border-top:1px solid var(--line)"><td>${esc(x.name)}</td><td dir="ltr" style="text-align:right">${esc(x.email)}</td>
+      <td><select data-role="${esc(x.id)}" ${x.id === me.id ? "disabled" : ""} style="min-width:150px">${ROLE_OPTS.map(([k, l]) => `<option value="${k}" ${k === x.role ? "selected" : ""}>${l}</option>`).join("")}</select></td>
+      <td><select data-st="${esc(x.id)}" ${x.id === me.id ? "disabled" : ""}><option value="active" ${x.status === "active" ? "selected" : ""}>نشط</option><option value="suspended" ${x.status === "suspended" ? "selected" : ""}>موقوف</option></select></td></tr>`).join("")}</table>
+      <p class="muted">${r.length} من ${users.length} مستخدمًا. لا يمكنك تعديل دورك أو إيقاف حسابك.</p>`; }
+  uq.oninput = drawUsers;
+  us.onchange = async (e) => { um.textContent = ""; const r = e.target.dataset.role, s = e.target.dataset.st;
+    try { if (r) { const { data: { session } } = await sb.auth.getSession(); const res = await fetch(APP_CONFIG.supabaseUrl + "/functions/v1/admin-users", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token, apikey: APP_CONFIG.supabaseKey }, body: JSON.stringify({ action: "set_role", user_id: r, role: e.target.value }) }); if (!res.ok) throw new Error((await res.json()).error || "فشل"); }
+      else if (s) { const { error } = await sb.from("users").update({ status: e.target.value }).eq("id", s); if (error) throw error; }
+      loadUsers(); } catch (x) { um.textContent = "تعذر الحفظ: " + (x.message || ""); loadUsers(); } };
+  loadUsers();
+
+  const [au, ij] = await Promise.all([sb.from("audit_logs").select("action,table_name,created_at").order("created_at", { ascending: false }).limit(8), sb.from("import_jobs").select("file_name,created_count,updated_count,skipped_count,created_at").order("created_at", { ascending: false }).limit(5)]);
+  document.getElementById("au").innerHTML = (au.data || []).map((a) => `<p style="margin:6px 0"><b>${esc(ACT[a.action] || a.action)}</b> <span class="muted">• ${esc(a.table_name || "")} • ${fmtDate(a.created_at)}</span></p>`).join("") || '<p class="muted">لا عمليات مسجلة بعد.</p>';
+  document.getElementById("ij").innerHTML = (ij.data || []).map((j) => `<p style="margin:6px 0"><b>${esc(j.file_name)}</b><br><span class="muted">أُنشئ ${j.created_count} • حُدّث ${j.updated_count} • تُجوهل ${j.skipped_count} • ${fmtDate(j.created_at)}</span></p>`).join("") || '<p class="muted">لا عمليات استيراد بعد.</p>';
+});
+</script></body></html>
