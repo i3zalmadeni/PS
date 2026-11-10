@@ -140,3 +140,13 @@ section.hero{border-radius:0 0 32px 32px;margin:0}.login+#ftr,.login~.lab-foot{m
 .reg .ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;flex:none}.reg .ic svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .reg b{display:block;font-weight:800;color:var(--brand2);margin-bottom:2px}.reg small{color:var(--ink2)}
 .reg:hover .ic{transform:rotate(-6deg) scale(1.06)}.reg .ic{transition:transform .2s}
+
+/* شريط أقسام لوحة التحكم الداكن أسفل القائمة الرئيسية */
+.who{align-self:center;color:var(--ink2);font-size:.85rem;padding-inline:8px;white-space:nowrap}
+.dnav{background:linear-gradient(135deg,var(--navy2),var(--navy));border-top:1px solid rgba(255,255,255,.06)}
+.dnav-in{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:6px}.dnav-in::-webkit-scrollbar{display:none}
+.dnav a{position:relative;white-space:nowrap;color:#cfe3e8;text-decoration:none;font-weight:500;font-size:.92rem;padding:9px 16px;border-radius:12px;transition:background .2s,color .2s}
+.dnav a:hover{background:rgba(255,255,255,.1);color:#fff}
+.dnav a.on{background:rgba(255,255,255,.14);color:#fff;font-weight:700}
+.dnav a.on::after{content:"";position:absolute;inset-inline:16px;bottom:3px;height:3px;border-radius:3px;background:linear-gradient(90deg,#f0b34a,#f6c25e)}
+@media (max-width:860px){.dnav a{padding:9px 12px}.who{display:none}}
