@@ -94,8 +94,8 @@ async function boot(page, render, o = {}) {
   const ctx = { me, isAdmin, can, uid: session.user.id };
   const items = NAV.filter((n) => !n[2] || (n[2] === "admin" ? isAdmin : can(n[2])));
   document.getElementById("shell").innerHTML =
-    `<header><div class="wrap top">${brandHTML("dashboard.html")}${moeHTML}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">☰</button>
-     <nav><a href="index.html">الرئيسية</a><a href="dashboard.html" class="${page === "dashboard.html" ? "on" : ""}">لوحة التحكم</a><span class="who">${esc(me.full_name)}</span><a href="#" id="out">خروج</a></nav></div>
+    `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">☰</button>
+     <nav><a href="index.html">الرئيسية</a><a href="dashboard.html" class="${page === "dashboard.html" ? "on" : ""}">لوحة التحكم</a><span class="who">${esc(me.full_name)}</span><a href="#" id="out">خروج</a></nav>${moeHTML}</div>
      <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n]) => `<a href="${h}" class="${h === page ? "on" : ""}">${n}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
   document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
   const main = document.getElementById("main");
