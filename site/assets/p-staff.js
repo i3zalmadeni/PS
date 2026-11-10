@@ -57,7 +57,7 @@ boot("staff.html", async (m, c) => {
       <div><label>الحالة الوظيفية</label><select name="employment_status">${opts(L.emp, r?.employment_status || "active")}</select></div>
       <div><label>تاريخ الانضمام</label><input type="date" name="joined_on" value="${esc(r?.joined_on || today())}"></div>
       <div><label>الصورة (اختياري)</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></div>
-      <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} style="width:auto"> إظهار الاسم والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)</label></div>
+      <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} style="width:auto"> إظهار الاسم والصورة والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)</label></div>
       ${canContact ? `<div><label>الرقم الوظيفي</label><input name="employee_no" value="${esc(p.employee_no)}"></div><div><label>البريد الإلكتروني</label><input type="email" name="email" value="${esc(p.email)}"></div><div><label>الجوال</label><input name="phone" value="${esc(p.phone)}"></div>` : ""}
       </div><p class="err" id="fe2"></p><div class="acts mt"><button class="btn">حفظ</button><button type="button" class="btn sec" id="cx">إلغاء</button></div></form>`);
     const f = md.el.querySelector("#sf"), cat = f.category, jt = f.job_title;
@@ -69,6 +69,12 @@ boot("staff.html", async (m, c) => {
       const base = { full_name: v.full_name.trim(), category: v.category, job_title: v.job_title, specialty: nn(v.specialty), qualification: nn(v.qualification), department: nn(v.department), employment_status: v.employment_status, joined_on: v.joined_on || today(), publish_public: f.publish_public.checked };
       try {
         const file = f.photo.files[0]; if (file) base.photo_path = await uploadMedia("personnel", id, file);
+        // نسخة عامة من الصورة: لا تُنشأ إلا لمن فعّلت الإدارة نشره، وتُزال عند إلغاء النشر
+        const pub = async (blob, type) => { const path = `personnel/${id}/${Date.now()}.${type.split("/")[1]}`; const u = await sb.storage.from("public-photos").upload(path, blob, { contentType: type }); if (u.error) throw new Error("تعذّر نشر الصورة: " + u.error.message); return path; };
+        const dropPub = async () => { if (r?.public_photo_path) await sb.storage.from("public-photos").remove([r.public_photo_path]); };
+        if (!base.publish_public) { if (r?.public_photo_path) { await dropPub(); base.public_photo_path = null; } }
+        else if (file) { await dropPub(); base.public_photo_path = await pub(file, file.type); }
+        else if (r?.photo_path && !r.public_photo_path) { const d = await sb.storage.from("registry-media").download(r.photo_path); if (!d.error) base.public_photo_path = await pub(d.data, d.data.type || "image/jpeg"); }
         const res = r ? await sb.from("staff_members").update(base).eq("id", id) : await sb.from("staff_members").insert({ ...base, id, created_by: c.uid });
         if (res.error) throw res.error;
         if (canContact) { const pr = await sb.from("staff_private").upsert({ staff_id: id, employee_no: nn(v.employee_no), email: nn(v.email)?.toLowerCase() ?? null, phone: nn(v.phone) }, { onConflict: "staff_id" }); if (pr.error) throw pr.error; }
