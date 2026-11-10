@@ -6,21 +6,22 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/landing.css">
+<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/landing.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js"></script>
-</head><body>
+<script src="assets/config.js"></script><script src="assets/footer.js"></script>
+</head><body class="pub">
 <header><div class="wrap top">
-  <a class="bm" href="#top"><img src="assets/favicon.svg" alt=""><span><b>مجتمع المعلمين الذكي</b><small>متوسطة لبيد بن ربيعة</small></span></a>
-  <nav aria-label="التنقل"><a href="#about">عن المدرسة</a><a href="#platform">المنصة</a><a href="#staff">طاقم المدرسة</a></nav>
-  <a class="btn pri" href="login.html">دخول المنصة</a>
+  <a class="bm" href="#top"><img src="assets/favicon.svg" width="40" height="40" alt=""><span><b>مجتمع المعلمين الذكي</b><small>متوسطة لبيد بن ربيعة</small></span></a>
+  <button class="navtoggle" id="navToggle" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="nav"><svg class="ico b" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="ico x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <nav id="nav"><a href="#top" class="on">الرئيسية</a><a href="#about">عن المدرسة</a><a href="#platform">المنصة</a><a href="#staff">طاقم المدرسة</a><a href="login.html" class="navbtn">دخول</a></nav>
   <span class="moe"><b>وزارة التعليم</b><small>Ministry of Education</small></span>
 </div></header>
 <main class="wrap" id="top">
-  <div class="hero"><span class="chip">مدرسة لبيد بن ربيعة المتوسطة • 1448هـ</span>
+  <div class="hero lhero"><div><span class="chip">مدرسة لبيد بن ربيعة المتوسطة • 1448هـ</span>
     <h1>مجتمع <span class="g">المعلمين</span> الذكي</h1>
     <p>مجتمع مهني رقمي يجمع معلمي المدرسة: ملف مهني حيّ لكل معلم، وممارسات تعليمية موثقة، ومجتمعات تعلم تتبادل الخبرة وتقيس الأثر.</p>
     <div class="acts"><a class="btn gold" href="login.html">دخول المعلمين</a><a class="btn" href="#about">تعرّف على المدرسة</a></div></div>
+    <div class="pills" aria-hidden="true"><span class="pill">ملف مهني حيّ</span><span class="pill">ممارسات موثقة</span><span class="pill">مجتمعات تعلم</span><span class="pill">شواهد معتمدة</span></div></div>
 
   <section id="about"><span class="kick">عن المدرسة</span><h2>مدرسة لبيد بن ربيعة المتوسطة</h2>
     <p class="lead">مدرسة متوسطة تؤمن بأن جودة التعليم تبدأ من نمو معلميها. رؤيتنا أن نكون مجتمعًا مهنيًا متعلمًا، يستثمر خبرات معلميه ويوثق ممارساتهم ويقيس أثر التطوير على التعليم والتعلم.</p>
@@ -43,11 +44,7 @@
 
   <div class="cta"><div><h2>هل أنت من معلمي المدرسة؟</h2><p>سجّل الدخول لإدارة ملفك المهني والمشاركة في المجتمع.</p></div><a class="btn gold" href="login.html">دخول المنصة</a></div>
 </main>
-<footer><div class="wrap cr">
-  <span class="moe"><b>وزارة التعليم</b><small>Ministry of Education</small></span>
-  <div class="mid"><b>مدرسة لبيد بن ربيعة المتوسطة</b><span>مدير المدرسة: خالد بن عبدالرحمن الباش</span></div>
-  <div class="lab">أحد منتجات <b>مختبر الأفكار – عبدالعزيز المديني</b></div>
-</div></footer>
+
 <script>
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
@@ -60,4 +57,7 @@ const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey)
     g.innerHTML = data.map((t) => `<div class="p"><div class="av" aria-hidden="true">${esc([...t.full_name.replace(/^(أ\.|د\.|الأستاذ|الأستاذة)\s*/, "")][0] || "؟")}</div><div><b>${esc(t.full_name)}</b><span>${esc([t.specialty, t.stage].filter(Boolean).join(" • ") || "معلم")}</span></div></div>`).join("");
   } catch (e) { g.outerHTML = '<div class="empty">تعذر تحميل قائمة الطاقم الآن.</div>'; }
 })();
+
+(() => { const btn = document.getElementById("navToggle"), hd = btn.closest("header"), set = (o) => { hd.classList.toggle("open", o); btn.setAttribute("aria-expanded", o ? "true" : "false"); };
+  btn.onclick = () => set(!hd.classList.contains("open")); document.getElementById("nav").onclick = (e) => { if (e.target.closest("a")) set(false); }; })();
 </script></body></html>

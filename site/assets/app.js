@@ -25,9 +25,26 @@ const NAV = [
   ["home.html", "الرئيسية"], ["teachers.html", "المعلمون"], ["profile.html", "ملفي المهني"],
   ["growth.html", "النمو المهني"], ["achievements.html", "الإنجازات والشواهد"],
   ["review.html", "مراجعة الاعتمادات", "reviewer"],
-  ["admin-users.html", "إدارة المعلمين والحسابات", "reviewer"],
-  ["#", "الممارسات • المجتمع • البرامج • مجتمعات التعلم • المبادرات • التحليلات (قريبًا)", "soon"],
+  ["admin-users.html", "إدارة المعلمين", "reviewer"],
 ];
+
+/** ترويسة الموقع الموحّدة (نفس هوية التقويم الذاتي الذكي). */
+function siteHeader(navHtml) {
+  return `<header><div class="wrap top">
+  <a class="bm" href="index.html"><img src="assets/favicon.svg" width="40" height="40" alt=""><span><b>مجتمع المعلمين الذكي</b><small>متوسطة لبيد بن ربيعة</small></span></a>
+  <button class="navtoggle" id="navToggle" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="nav"><svg class="ico b" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="ico x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  <nav id="nav">${navHtml}</nav>
+  <span class="moe"><b>وزارة التعليم</b><small>Ministry of Education</small></span>
+</div></header>`;
+}
+function wireNavToggle() {
+  const btn = document.getElementById("navToggle"), nav = document.getElementById("nav"); if (!btn || !nav) return;
+  const hd = btn.closest("header"), set = (on) => { hd.classList.toggle("open", on); btn.setAttribute("aria-expanded", on ? "true" : "false"); };
+  btn.addEventListener("click", () => set(!hd.classList.contains("open")));
+  nav.addEventListener("click", (e) => { if (e.target.closest("a")) set(false); });
+  document.addEventListener("click", (e) => { if (!hd.contains(e.target)) set(false); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") set(false); });
+}
 
 /** يحمّل المستخدم الحالي أو يحوّل إلى الدخول، ثم يرسم الهيكل وينفذ الصفحة. */
 async function boot(page, render) {
@@ -38,12 +55,13 @@ async function boot(page, render) {
   const { data: t } = await sb.from("teachers").select("id,full_name").eq("user_id", row.id).maybeSingle();
   const me = { id: row.id, email: row.email, role: row.role, teacherId: t?.id ?? null, name: t?.full_name ?? row.email };
   const links = NAV.filter((n) => n[2] !== "reviewer" || isReviewer(me))
-    .map((n) => `<a href="${n[0]}" class="${n[2] === "soon" ? "soon" : ""} ${n[0] === page ? "on" : ""}">${esc(n[1])}</a>`).join("");
-  document.getElementById("shell").innerHTML = `<div class="wrap"><aside><h1>مجتمع المعلمين الذكي</h1>${links}
-    <hr style="border:0;border-top:1px solid var(--b100);margin:14px 0"><div class="muted">${esc(me.name)}<br>${esc(ROLE_LABELS[me.role])}</div>
-    <a href="#" id="out">تسجيل الخروج</a></aside><main id="main"></main></div>`;
+    .map((n) => `<a href="${n[0]}" class="${n[0] === page ? "on" : ""}">${esc(n[1])}</a>`).join("");
+  document.getElementById("shell").innerHTML = siteHeader(links + `<a href="#" id="out" class="navbtn" title="${esc(me.name)} – ${esc(ROLE_LABELS[me.role])}">خروج</a>`)
+    + `<main class="wrap" id="main"></main>` + (window.labFooterHtml || "");
+  wireNavToggle();
   document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
   const main = document.getElementById("main");
+  main.insertAdjacentHTML("beforebegin", "");
   try { await render(me, main); } catch (e) { console.error(e); main.innerHTML = `<p class="err">تعذر تحميل الصفحة.</p>`; }
 }
 const header = (t, s) => `<h2 class="title">${esc(t)}</h2>${s ? `<p class="sub">${esc(s)}</p>` : ""}`;

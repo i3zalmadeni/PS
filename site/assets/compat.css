@@ -1,0 +1,23 @@
+/* توافق مكوّنات صفحات المنصة مع theme.css (هوية التقويم الذاتي الذكي) */
+body.pg main{padding-block:26px 40px}
+body.pg h2.title{font-size:1.7rem;font-weight:800;color:var(--ink)}
+body.pg .sub{color:var(--ink2);margin:2px 0 20px}
+body.pg .card{display:block;position:relative;overflow:visible;padding:20px;border-radius:22px;border:1px solid var(--line);background:var(--surface);box-shadow:var(--shadow);margin-bottom:14px}
+body.pg .card::before,body.pg .card::after{display:none}
+body.pg .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:0}
+body.pg .muted{color:var(--muted);font-size:.88rem}
+body.pg .err{color:var(--bad)} body.pg .okmsg{color:var(--ok)}
+body.pg .note{background:var(--acc2soft);border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));border-radius:14px;padding:10px 14px;font-size:.9rem;margin-bottom:14px}
+body.pg .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+body.pg .badge{display:inline-block;padding:1px 12px;border-radius:99px;font-size:.78rem;background:var(--brandsoft);color:var(--brand2)}
+body.pg .badge.ok{background:#e8f6ee;color:#24895a} body.pg .badge.warn{background:#fdf2e3;color:#b86d0c} body.pg .badge.bad{background:#fcebee;color:#b8434f}
+body.pg .stat b{display:block;font-size:1.8rem} body.pg .stat span{font-size:.82rem;color:var(--ink2)}
+body.pg .bar{height:8px;background:var(--brandsoft);border-radius:99px;overflow:hidden} body.pg .bar i{display:block;height:100%;background:var(--grad)}
+body.pg label{display:block;font-size:.88rem;margin:10px 0 4px;color:var(--ink2);font-weight:500}
+body.pg input:not([type=checkbox]):not([type=radio]),body.pg select,body.pg textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:var(--surface);color:var(--ink)}
+body.pg .btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:12px;padding:9px 18px;background:var(--grad);color:#fff;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}
+body.pg .btn.sec{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+body.pg .btn.red{background:var(--bad);color:#fff}
+body.pg .btn[disabled]{opacity:.5;cursor:not-allowed}
+body.pg table{border-collapse:collapse} body.pg td,body.pg th{padding:6px 8px;text-align:start}
+body.pg .login{max-width:420px;margin:6vh auto;padding:0 16px}
