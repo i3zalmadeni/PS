@@ -1,14 +1,22 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>تسجيل الدخول – النواة الرقمية</title><link rel="stylesheet" href="assets/core.css"></head><body>
-<div class="login card"><h2>النواة الرقمية</h2><p class="sub">متوسطة لبيد بن ربيعة</p>
-<form id="f"><label for="e">البريد الإلكتروني</label><input id="e" type="email" required autocomplete="username">
-<label for="p">كلمة المرور</label><input id="p" type="password" required autocomplete="current-password">
-<p class="err" id="m" role="alert"></p><button>دخول</button></form></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js"></script><script>
-const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
-if (location.search.includes("nostaff")) document.getElementById("m").textContent = "هذا الحساب غير مرتبط بسجل منسوب.";
-document.getElementById("f").onsubmit = async (ev) => { ev.preventDefault();
-  const { error } = await sb.auth.signInWithPassword({ email: e.value, password: p.value });
-  if (error) document.getElementById("m").textContent = "بيانات الدخول غير صحيحة."; else location.replace("dashboard.html"); };
-</script></body></html>
+<title>النواة الرقمية – متوسطة لبيد بن ربيعة</title><meta name="description" content="المنصة المركزية لمنسوبي متوسطة لبيد بن ربيعة وفرق العمل والهوية والصلاحيات"><link rel="stylesheet" href="assets/core.css"></head><body>
+<header><div class="wrap top"><div class="brand"><b>النواة الرقمية</b><small>متوسطة لبيد بن ربيعة</small></div><nav><a href="#about">عن النواة</a><a href="#modules">الوحدات</a><a href="#systems">الأنظمة المرتبطة</a><a class="btn" href="login.html">تسجيل الدخول</a></nav></div></header>
+<section class="hero"><div class="wrap"><h1>المرجع الرقمي المركزي للمدرسة</h1>
+<p>قاعدة واحدة لمنسوبي المدرسة وفرق العمل والهوية والصلاحيات، تنطلق منها أنظمة المدرسة الحالية والمستقبلية دون تكرار للبيانات.</p>
+<a class="btn" href="login.html">الدخول إلى النواة</a> <a class="btn ghost" href="#modules">استعرض الوحدات</a></div></section>
+<main class="wrap">
+<section class="pub" id="about"><h2>ما هي النواة الرقمية؟</h2><div class="grid">
+<div class="card feat"><b>معرّف موحد</b>لكل منسوب معرّف ثابت واحد تعتمده جميع الأنظمة المرتبطة بدل نسخ البيانات.</div>
+<div class="card feat"><b>مصدر واحد للحقيقة</b>تُدار بيانات الهيئة التعليمية والإدارية والمساندة في مكان واحد.</div>
+<div class="card feat"><b>خصوصية وصلاحيات</b>فصل بين الوظيفة والدور التنظيمي والصلاحية التقنية، وسجل تدقيق للعمليات.</div></div></section>
+<section class="pub" id="modules"><h2>الوحدات</h2><div class="grid">
+<div class="card feat"><b>المنسوبون</b>الهيئة التعليمية والإدارية والمساندة وسجلهم الوظيفي.</div>
+<div class="card feat"><b>الملف المهني</b>المؤهلات والمهارات والشهادات والإنجازات والشواهد.</div>
+<div class="card feat"><b>الفرق واللجان</b>عضويات وأدوار وتواريخ مع حفظ السجل التاريخي.</div>
+<div class="card feat"><b>الهوية والصلاحيات</b>أدوار وصلاحيات مستقلة لكل نظام وفريق.</div>
+<div class="card feat"><b>مركز الربط</b>واجهات برمجية موحدة بمفاتيح ونطاقات وصول لكل نظام.</div>
+<div class="card feat"><b>لوحة المؤشرات</b>صورة شاملة للمنسوبين والفرق وحالة الأنظمة.</div></div></section>
+<section class="pub" id="systems"><h2>الأنظمة المرتبطة</h2><div class="grid">
+<div class="card feat"><b>نظام التقويم الذاتي الذكي</b></div><div class="card feat"><b>نظام الخطط الذكية</b></div>
+<div class="card feat"><b>نظام إدارة البرامج والمبادرات</b></div><div class="card feat"><b>مجتمع المعلمين الذكي</b></div></div></section>
+</main><footer class="ft"><div class="wrap">متوسطة لبيد بن ربيعة · النواة الرقمية للمدرسة</div></footer></body></html>
