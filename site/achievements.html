@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الإنجازات والشواهد – مجتمع المعلمين الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/app.js"></script>
+</head><body><div id="shell"></div><script>
+
+boot("achievements.html", async (me, main) => {
+  if (!me.teacherId) { main.innerHTML = header("الإنجازات والشواهد") + '<div class="note">حسابك غير مرتبط بملف معلم.</div>'; return; }
+  main.innerHTML = header("الإنجازات والشواهد", "سجّل إنجازك وأرفق شواهده، ثم أرسله للاعتماد. المعتمد لا يتغير بصمت: أي تعديل يعيده للمراجعة.") + `
+  <form class="card" id="af"><h3 style="margin-top:0">إنجاز جديد</h3><label>العنوان *</label><input type="text" name="title" required maxlength="200">
+  <div class="grid"><div><label>النوع</label><select name="type">${Object.entries(ACH_TYPES).map(([k, v]) => `<option value="${k}" ${k === "achievement" ? "selected" : ""}>${v}</option>`).join("")}</select></div>
+  <div><label>تاريخ الإنجاز</label><input type="date" name="date"></div></div>
+  <label>الوصف</label><textarea name="description" rows="3"></textarea>
+  <label>الشواهد (PDF، صور، Word، PowerPoint، Excel – حتى 10 ميغابايت للملف)</label><input type="file" name="files" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.docx,.pptx,.xlsx">
+  <p class="muted">لا ترفع بيانات طلاب أو صورهم دون تصريح.</p><p id="am" class="err" role="alert"></p>
+  <button class="btn sec" name="intent" value="draft">حفظ كمسودة</button> <button class="btn" name="intent" value="submit">حفظ وإرسال للاعتماد</button></form><div id="al"></div>`;
+  async function load() {
+    const { data } = await sb.from("achievements").select("id,title,achievement_type,achieved_on,status,review_note,evidence_files(id,file_name,storage_path)").eq("teacher_id", me.teacherId).order("created_at", { ascending: false });
+    al.innerHTML = (data || []).length ? data.map((a) => `<div class="card"><div class="row"><b>${esc(a.title)}</b>${badge(a.status)}</div>
+      <p class="muted">${esc(ACH_TYPES[a.achievement_type])} • ${fmtDate(a.achieved_on)} • الشواهد: ${(a.evidence_files || []).length}</p>
+      ${a.review_note ? `<p class="note">ملاحظة المراجع: ${esc(a.review_note)}</p>` : ""}
+      ${["draft", "needs_revision", "rejected"].includes(a.status) ? `<button class="btn sec" data-sub="${esc(a.id)}">إرسال للاعتماد</button> <button class="btn sec red" style="color:#fff" data-del="${esc(a.id)}">حذف</button>` : ""}</div>`).join("") : '<p class="muted">لا توجد إنجازات بعد.</p>';
+  }
+  af.onsubmit = async (ev) => { ev.preventDefault(); am.textContent = "";
+    const f = new FormData(af), intent = ev.submitter?.value || "draft", files = f.getAll("files").filter((x) => x.size > 0);
+    for (const x of files) { if (!MIME[x.type]) { am.textContent = "نوع ملف غير مسموح: " + x.name; return; } if (x.size > 10485760) { am.textContent = "الملف أكبر من 10 ميغابايت: " + x.name; return; } }
+    if (intent === "submit" && !files.length) { am.textContent = "أرفق شاهدًا واحدًا على الأقل قبل الإرسال."; return; }
+    const status = intent === "submit" ? "submitted" : "draft";
+    const { data: ach, error } = await sb.from("achievements").insert({ teacher_id: me.teacherId, title: f.get("title").trim(), achievement_type: f.get("type"), description: f.get("description").trim() || null, achieved_on: f.get("date") || null, status, created_by: me.id }).select("id").single();
+    if (error || !ach) { am.textContent = "تعذر حفظ الإنجاز."; return; }
+    for (const x of files) {
+      const path = `${me.teacherId}/${ach.id}/${crypto.randomUUID()}.${EXT[x.type]}`;
+      const up = await sb.storage.from("evidence").upload(path, x, { contentType: x.type });
+      if (up.error) { am.textContent = "حُفظ الإنجاز لكن تعذر رفع " + x.name; continue; }
+      const ins = await sb.from("evidence_files").insert({ teacher_id: me.teacherId, achievement_id: ach.id, title: x.name.replace(/\.[^.]+$/, "").slice(0, 200), evidence_type: x.type.startsWith("image/") ? "image" : "document", file_name: x.name.slice(0, 255), storage_path: path, mime_type: x.type, size_bytes: x.size, status, created_by: me.id });
+      if (ins.error) { await sb.storage.from("evidence").remove([path]); am.textContent = "تعذر تسجيل " + x.name; }
+    }
+    af.reset(); load(); };
+  main.addEventListener("click", async (ev) => { const s = ev.target.closest("[data-sub]"), d = ev.target.closest("[data-del]");
+    if (s) { const { count } = await sb.from("evidence_files").select("id", { count: "exact", head: true }).eq("achievement_id", s.dataset.sub);
+      if (!count) { alert("أرفق شاهدًا قبل الإرسال."); return; }
+      await sb.from("achievements").update({ status: "submitted" }).eq("id", s.dataset.sub);
+      await sb.from("evidence_files").update({ status: "submitted" }).eq("achievement_id", s.dataset.sub).in("status", ["draft", "needs_revision", "rejected"]); load(); }
+    if (d && confirm("حذف هذا الإنجاز وشواهده؟")) { await sb.from("achievements").delete().eq("id", d.dataset.del); load(); } });
+  load();
+});
+</script></body></html>

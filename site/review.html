@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مراجعة الاعتمادات – مجتمع المعلمين الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/app.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/app.js"></script>
+</head><body><div id="shell"></div><script>
+
+boot("review.html", async (me, main) => {
+  if (!isReviewer(me)) { location.replace("index.html"); return; }
+  main.innerHTML = header("مراجعة الاعتمادات", "الأقدم أولًا. قرارك يُسجَّل ويصل المعلم كإشعار.") + '<div id="rl"></div>';
+  async function load() {
+    const { data } = await sb.from("achievements").select("id,title,achievement_type,description,achieved_on,status,teachers(full_name),evidence_files(id,file_name,storage_path)").in("status", ["submitted", "under_review"]).order("updated_at");
+    if (!(data || []).length) { rl.innerHTML = '<div class="card muted">لا توجد طلبات بانتظار المراجعة.</div>'; return; }
+    rl.innerHTML = "";
+    for (const a of data) {
+      const links = [];
+      for (const f of a.evidence_files || []) { const { data: u } = await sb.storage.from("evidence").createSignedUrl(f.storage_path, 600); links.push(u?.signedUrl ? `<a href="${esc(u.signedUrl)}" target="_blank" rel="noopener noreferrer">${esc(f.file_name)}</a>` : esc(f.file_name)); }
+      const c = document.createElement("div"); c.className = "card";
+      c.innerHTML = `<div class="row"><b>${esc(a.title)}</b>${badge(a.status)}</div><p class="muted">${esc(a.teachers?.full_name)} • ${esc(ACH_TYPES[a.achievement_type])} • ${fmtDate(a.achieved_on)}</p>
+        ${a.description ? `<p style="white-space:pre-wrap">${esc(a.description)}</p>` : ""}<p><b>الشواهد (${links.length}):</b> ${links.join(" • ") || '<span class="err">لا توجد شواهد</span>'}</p>
+        <textarea rows="2" placeholder="ملاحظة للمعلم (مطلوبة عند الإعادة أو الرفض)"></textarea><p class="err" role="alert"></p>
+        <div class="row" style="justify-content:flex-start"><button class="btn" data-d="approved">اعتماد</button><button class="btn sec" data-d="needs_revision">إعادة للاستكمال</button><button class="btn red" data-d="rejected">رفض</button>${a.status === "submitted" ? '<button class="btn sec" data-d="under_review">بدء المراجعة</button>' : ""}</div>`;
+      c.onclick = async (ev) => { const b = ev.target.closest("button[data-d]"); if (!b) return; const note = c.querySelector("textarea").value.trim(), err = c.querySelector(".err");
+        if (["needs_revision", "rejected"].includes(b.dataset.d) && !note) { err.textContent = "اكتب توضيحًا للمعلم."; return; }
+        const { error } = await sb.rpc("review_record", { p_table: "achievements", p_id: a.id, p_decision: b.dataset.d, p_note: note || null });
+        if (error) { err.textContent = "تعذر تنفيذ القرار."; return; } load(); };
+      rl.appendChild(c);
+    }
+  }
+  load();
+});
+</script></body></html>
