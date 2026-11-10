@@ -13,9 +13,9 @@ const FIELDS = [["full_name","الاسم الكامل *",["الاسم الكام
   ["years_experience","سنوات الخبرة",["سنوات الخبرة","الخبرة","years_experience"]],["employee_no","الرقم الوظيفي",["الرقم الوظيفي","employee_no"]],
   ["phone","رقم التواصل",["رقم التواصل","الجوال","phone"]],["job_status","الحالة الوظيفية",["الحالة الوظيفية","job_status"]]];
 
-async function callFn(body) {
+async function callFn(body, fn = "admin-users") {
   const { data: { session } } = await sb.auth.getSession();
-  const r = await fetch(APP_CONFIG.supabaseUrl + "/functions/v1/admin-users", { method: "POST",
+  const r = await fetch(APP_CONFIG.supabaseUrl + "/functions/v1/" + fn, { method: "POST",
     headers: { "Content-Type": "application/json", Authorization: "Bearer " + session.access_token, apikey: APP_CONFIG.supabaseKey || APP_CONFIG.publishableKey || APP_CONFIG.anonKey },
     body: JSON.stringify(body) });
   const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || "تعذر تنفيذ الطلب"); return j;
@@ -41,7 +41,9 @@ boot("admin-users.html", async (me, main) => {
     <button class="btn sec" id="tpl" type="button">تنزيل القالب</button>
     <label>ملف Excel (.xlsx)</label><input type="file" id="xf" accept=".xlsx,.xls">
     <div id="map"></div><div id="prev"></div></div>
-  <div id="out"></div>`;
+  <div class="card"><h3 style="margin-top:0">المعلمون الحاليون وتعديل الحسابات</h3>
+    <input id="q" placeholder="بحث بالاسم أو البريد أو التخصص" style="max-width:360px"><div id="lst" style="margin-top:10px"></div></div>
+  <div id="ed"></div><div id="out"></div>`;
 
   function showResults(list) {
     const withPw = list.filter((r) => r.password);
@@ -53,10 +55,54 @@ boot("admin-users.html", async (me, main) => {
     out.scrollIntoView();
   }
 
+
+  let all = [];
+  async function loadList() {
+    const [{ data: ts }, { data: ps }] = await Promise.all([
+      sb.from("teachers").select("id,user_id,full_name,specialty,stage,years_experience,is_active,show_public").order("full_name"),
+      sb.from("teacher_private").select("teacher_id,email,employee_no,phone,job_status")]);
+    const pm = Object.fromEntries((ps || []).map((p) => [p.teacher_id, p]));
+    all = (ts || []).map((t) => ({ ...t, ...(pm[t.id] || {}) })); drawList();
+  }
+  function drawList() {
+    const k = q.value.trim().toLowerCase();
+    const rows = all.filter((t) => !k || [t.full_name, t.email, t.specialty].some((v) => String(v || "").toLowerCase().includes(k)));
+    lst.innerHTML = rows.length ? `<table style="width:100%;border-collapse:collapse"><tr><th>الاسم</th><th>البريد</th><th>التخصص</th><th>الحساب</th><th></th></tr>` +
+      rows.map((t) => `<tr style="border-top:1px solid #E3EEF3"><td>${esc(t.full_name)}</td><td dir="ltr">${esc(t.email || "")}</td><td>${esc(t.specialty || "")}</td>
+      <td>${t.is_active ? "نشط" : "موقوف"}${t.user_id ? "" : " • بلا حساب"}</td><td><button class="btn sec" data-e="${t.id}" type="button">تعديل</button></td></tr>`).join("") + "</table>" : '<p class="muted">لا نتائج.</p>';
+    lst.querySelectorAll("[data-e]").forEach((b) => (b.onclick = () => editForm(all.find((t) => t.id === b.dataset.e))));
+  }
+  q.oninput = drawList;
+  function editForm(t) {
+    const v = (x) => esc(x ?? "");
+    ed.innerHTML = `<div class="card" id="edc"><h3 style="margin-top:0">تعديل: ${v(t.full_name)}</h3><form id="ef">
+      <div class="grid"><div><label>الاسم الكامل *</label><input name="full_name" required maxlength="200" value="${v(t.full_name)}"></div>
+      <div><label>البريد الإلكتروني *</label><input name="email" type="email" dir="ltr" required value="${v(t.email)}"></div>
+      <div><label>التخصص</label><input name="specialty" value="${v(t.specialty)}"></div><div><label>المرحلة التعليمية</label><input name="stage" value="${v(t.stage)}"></div>
+      <div><label>سنوات الخبرة</label><input name="years_experience" type="number" min="0" max="60" value="${v(t.years_experience)}"></div>
+      <div><label>الرقم الوظيفي</label><input name="employee_no" value="${v(t.employee_no)}"></div>
+      <div><label>رقم التواصل</label><input name="phone" dir="ltr" value="${v(t.phone)}"></div><div><label>الحالة الوظيفية</label><input name="job_status" value="${v(t.job_status)}"></div></div>
+      <label><input type="checkbox" name="is_active" ${t.is_active ? "checked" : ""} style="width:auto"> الحساب نشط (إلغاؤه يوقف الدخول)</label><br>
+      <label><input type="checkbox" name="show_public" ${t.show_public ? "checked" : ""} style="width:auto"> يظهر في الصفحة العامة للمدرسة</label>
+      <p id="em" class="err" role="alert"></p>
+      <button class="btn">حفظ التعديلات</button> <button class="btn sec" type="button" id="rp" ${t.user_id ? "" : "disabled"}>إعادة تعيين كلمة المرور</button>
+      <button class="btn sec" type="button" id="cx">إغلاق</button></form></div>`;
+    cx.onclick = () => (ed.innerHTML = "");
+    rp.onclick = async () => { if (!confirm("سيتم إنشاء كلمة مرور مؤقتة جديدة. متابعة؟")) return;
+      try { const r = await callFn({ action: "reset_password", teacher_id: t.id }); showResults([{ name: t.full_name, email: t.email, status: "updated", password: r.password }]); }
+      catch (x) { em.textContent = x.message; } };
+    ef.onsubmit = async (e) => { e.preventDefault(); em.textContent = ""; const fd = new FormData(ef); const f = Object.fromEntries(fd);
+      f.is_active = fd.has("is_active"); f.show_public = fd.has("show_public"); e.submitter.disabled = true;
+      try { await callFn({ action: "update_teacher", teacher_id: t.id, fields: f }, "admin-teacher-edit"); ed.innerHTML = '<p class="note">تم حفظ التعديلات.</p>'; await loadList(); }
+      catch (x) { em.textContent = x.message; e.submitter.disabled = false; } };
+    edc.scrollIntoView();
+  }
+  loadList();
+
   one.onsubmit = async (e) => { e.preventDefault(); om.textContent = "";
     const t = Object.fromEntries(new FormData(one)); const btn = e.submitter; btn.disabled = true;
     try { const { result } = await callFn({ action: "create_teacher", teacher: t });
-      if (result.status === "invalid") om.textContent = result.error; else { showResults([result]); one.reset(); }
+      if (result.status === "invalid") om.textContent = result.error; else { showResults([result]); one.reset(); loadList(); }
     } catch (x) { om.textContent = x.message; } btn.disabled = false; };
 
   tpl.onclick = () => { const wb = XLSX.utils.book_new();
