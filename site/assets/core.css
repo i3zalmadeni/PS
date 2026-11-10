@@ -442,3 +442,9 @@ header nav a{position:relative}header nav a::after{content:"";position:absolute;
 .ctab{transition:transform .5s}.tcard,.gtile,.fchip{will-change:transform}
 @media (prefers-reduced-motion:reduce){.js .rsec,.js .rsec .dt tbody tr,.js .rsec .kv dd,.js .rsec .kv dt,.js .rsec .flow li{opacity:1!important;transform:none!important;animation:none!important}.hero3 *{animation:none!important}.hero3 .illus,.fl,.hero3 .h3t,.gauge{translate:none!important;transform:none}}
 @media (max-width:900px){.sh .num{display:none}}
+/* توافق صفحة التعريف مع الصفحة الواحدة */
+.spa #about.sct{padding-top:40px}
+.spa .ab{display:flex;flex-direction:column;gap:56px}
+.spa .ab-s{scroll-margin-top:130px}
+.spa .sct .ab-sh{margin:0 0 22px}
+.spa #data .ab-sh,.spa #people .ab-sh{margin-bottom:22px}
