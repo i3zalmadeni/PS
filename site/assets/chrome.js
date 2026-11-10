@@ -1,4 +1,5 @@
 /* عناصر الهوية المشتركة: الشعار، شارة الوزارة، التذييل، حركة الشريط مع التمرير */
+document.documentElement.classList.add("js");
 const ICONS = {"home": "<path d=\"M3 11l9-8 9 8M5 10v10h14V10M10 20v-6h4v6\"/>", "info": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 11v5M12 8h.01\"/>", "chart": "<path d=\"M4 20v-7M10 20V5M16 20v-10M22 20H2\"/>", "key": "<circle cx=\"8\" cy=\"15\" r=\"4\"/><path d=\"M11 12l8-8M16 7l3 3M14 9l2 2\"/>", "school": "<path d=\"M3 10l9-6 9 6M5 10v10M19 10v10M2 20h20M9 20v-6h6v6\"/>", "users": "<circle cx=\"9\" cy=\"8\" r=\"3.5\"/><path d=\"M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5M16 4.6a3.5 3.5 0 010 6.8M18 14.8c1.9.7 3.2 2.3 3.5 5.2\"/>", "cap": "<path d=\"M2 9l10-5 10 5-10 5zM6 11.5V16c0 1.4 2.7 3 6 3s6-1.6 6-3v-4.5\"/>", "building": "<path d=\"M4 21V5a2 2 0 012-2h8a2 2 0 012 2v16M16 9h2a2 2 0 012 2v10M2 21h20M8 7h4M8 11h4M8 15h4\"/>", "lock": "<rect x=\"5\" y=\"11\" width=\"14\" height=\"9\" rx=\"2\"/><path d=\"M8 11V8a4 4 0 018 0v3\"/>", "gear": "<path d=\"M3 6h9M16 6h5M3 12h5M12 12h9M3 18h11M18 18h3\"/><circle cx=\"14\" cy=\"6\" r=\"2\"/><circle cx=\"10\" cy=\"12\" r=\"2\"/><circle cx=\"16\" cy=\"18\" r=\"2\"/>", "globe": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18\"/>", "user": "<circle cx=\"12\" cy=\"8\" r=\"4\"/><path d=\"M4 21c1-4 4-6 8-6s7 2 8 6\"/>", "logout": "<path d=\"M10 4H6a2 2 0 00-2 2v12a2 2 0 002 2h4M15 8l4 4-4 4M19 12H9\"/>", "compass": "<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M15.5 8.5l-2 5-5 2 2-5z\"/>", "grid": "<rect x=\"3\" y=\"3\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"13.5\" y=\"3\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"3\" y=\"13.5\" width=\"7.5\" height=\"7.5\" rx=\"2\"/><rect x=\"13.5\" y=\"13.5\" width=\"7.5\" height=\"7.5\" rx=\"2\"/>", "mail": "<rect x=\"3\" y=\"5\" width=\"18\" height=\"14\" rx=\"2\"/><path d=\"M3 7l9 6 9-6\"/>", "phone": "<path d=\"M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2\"/>", "pin": "<path d=\"M12 21s7-6 7-11a7 7 0 10-14 0c0 5 7 11 7 11z\"/><circle cx=\"12\" cy=\"10\" r=\"2.5\"/>", "up": "<path d=\"M12 19V5M6 11l6-6 6 6\"/>", "signal": "<path d=\"M5 12a10 10 0 0114 0M8 15a6 6 0 018 0M12 19h.01\"/>", "hourglass": "<path d=\"M6 3h12M6 21h12M7 3c0 5 5 6 5 9s-5 4-5 9M17 3c0 5-5 6-5 9s5 4 5 9\"/>", "menu": "<path d=\"M4 7h16M4 12h16M4 17h16\"/>"};
 const ico = (n) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ""}</svg>`;
 const LOGO = '<svg class="bm-ic" viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="lgh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18a4ab"/><stop offset="1" stop-color="#0c6f82"/></linearGradient></defs><circle cx="80" cy="80" r="76" fill="#fff"/><g class="ci-ring"><circle cx="80" cy="80" r="62" fill="none" stroke="#4fa39a" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 10.8"/></g><circle cx="80" cy="80" r="42" fill="url(#lgh)"/><text x="80" y="101" text-anchor="middle" font-family="Tajawal,Tahoma,Arial,sans-serif" font-size="70" font-weight="800" fill="#fff">ن</text><g class="ci-orb"><circle cx="80" cy="16" r="8" fill="#f0b34a"/><circle cx="24.6" cy="112" r="8" fill="#e0955a"/><circle cx="135.4" cy="112" r="8" fill="#4fa39a"/></g></svg>';
@@ -14,10 +15,10 @@ const footerHTML = `<footer class="lab-foot"><div class="wrap lf"><div class="lf
 function bindNav() { const b = document.querySelector(".navtoggle"), n = document.querySelector("header nav"); if (b && n) b.onclick = () => { const o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o); }; }
 
 // ===== الموقع العام: ترويسة (النواة يميناً، الصفحات وسطاً، شعار الوزارة يساراً) وديناميكية الصفحات =====
-const PUB_NAV = [["index.html", "الرئيسية"], ["data.html", "بيانات المدرسة"], ["people.html", "منسوبو المدرسة"], ["about.html", "عن النواة"]];
+const PUB_NAV = [["home", "الرئيسية"], ["about", "عن النواة"], ["data", "بيانات المدرسة"], ["people", "منسوبو المدرسة"]];
 const headMoe = '<span class="moe hm"><b>وزارة التعليم</b><small>Ministry of Education</small></span>';
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${n}</a>`).join("")}</nav>${headMoe}<a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a></div></header>`;
+<nav>${PUB_NAV.map(([h, n]) => `<a href="${active === "index.html" ? "" : "index.html"}#${h}" data-s="${h}">${n}</a>`).join("")}</nav>${headMoe}<a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a></div></header>`;
 // شريط داكن لأقسام الصفحة الحالية (يُبنى من العناوين) مع تمييز القسم الظاهر أثناء التمرير
 function pubSubnav() {
   const bar = document.getElementById("pubsub"); if (!bar) return;
@@ -43,5 +44,16 @@ function pubInit(active) {
   if (!("IntersectionObserver" in window)) { rv.forEach((e) => e.classList.add("in")); document.querySelectorAll("[data-count]").forEach(count); return; }
   const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); e.target.querySelectorAll("[data-count]").forEach(count); if (e.target.dataset.count) count(e.target); io.unobserve(e.target); } }), { threshold: 0.15 });
   rv.forEach((e) => io.observe(e));
-  const hero = document.querySelector(".hero"); if (hero && !reduce) hero.addEventListener("pointermove", (ev) => { const r = hero.getBoundingClientRect(); hero.style.setProperty("--mx", ((ev.clientX - r.left) / r.width).toFixed(3)); hero.style.setProperty("--my", ((ev.clientY - r.top) / r.height).toFixed(3)); });
+  const hero = document.querySelector(".hero,.hero3"); if (hero && !reduce) hero.addEventListener("pointermove", (ev) => { const r = hero.getBoundingClientRect(); hero.style.setProperty("--mx", ((ev.clientX - r.left) / r.width).toFixed(3)); hero.style.setProperty("--my", ((ev.clientY - r.top) / r.height).toFixed(3)); });
 }
+
+(function () {
+  const r = document.documentElement, reduce = matchMedia("(prefers-reduced-motion:reduce)").matches; let t = 0;
+  const run = () => { t = 0; const y = scrollY; r.style.setProperty("--sy", y.toFixed(0));
+    const h = document.querySelector("header"); if (h) h.classList.toggle("sc", y > 40);
+    const links = [...document.querySelectorAll("header nav a[data-s]")]; if (!links.length || !document.getElementById("home")) return;
+    let cur = ""; links.forEach((a) => { const el = document.getElementById(a.dataset.s); if (el && el.getBoundingClientRect().top < innerHeight * 0.35) cur = a.dataset.s; });
+    links.forEach((a) => { const on = a.dataset.s === cur; a.classList.toggle("on", on); on ? a.setAttribute("aria-current", "true") : a.removeAttribute("aria-current"); }); };
+  if (!reduce) addEventListener("scroll", () => { if (!t) t = requestAnimationFrame(run); }, { passive: true }); else addEventListener("scroll", run, { passive: true });
+  addEventListener("load", run); addEventListener("hashchange", () => setTimeout(run, 50)); setTimeout(run, 300);
+})();

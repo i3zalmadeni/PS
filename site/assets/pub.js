@@ -36,7 +36,7 @@ function tocBind(root) {
   addEventListener("scroll", on, { passive: true }); on();
 }
 const toc = (l) => `<nav class="toc"><b>فهرس المستودع</b>${l.map(([id, i, t]) => `<a href="#${id}">${ico(i)}${t}</a>`).join("")}</nav>`;
-const rsec = (id, i, t, small, body) => `<section class="rsec" id="${id}"><div class="rh">${ico(i)}<h2>${t}</h2><small>${small || ""}</small></div><div class="rb">${body}</div></section>`;
+const rsec = (id, i, t, small, body) => `<section class="rsec rv" id="${id}"><div class="rh">${ico(i)}<h2>${t}</h2><small>${small || ""}</small></div><div class="rb">${body}</div></section>`;
 const kv = (rows) => `<dl class="kv">${rows.map(([i, k, v]) => `<dt>${ico(i)}${k}</dt><dd dir="auto">${v}</dd>`).join("")}</dl>`;
 const csvDown = (name, head, rows) => { const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`; const b = new Blob(["\ufeff" + [head, ...rows].map((r) => r.map(q).join(",")).join("\n")], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; a.click(); };
 
@@ -64,7 +64,7 @@ async function renderData() {
     document.querySelector("#ftbl tbody").innerHTML = cur.map((f, n) => { const st = FSTAT[f.status] || ["", ""]; return `<tr><td class="idx">${n + 1}</td><td><b>${pesc(f.name)}</b></td><td>${pesc(f.type_name || "")}</td><td>${pesc(f.building || "—")}</td><td>${pesc(f.floor ?? "—")}</td><td class="n">${f.capacity || "—"}</td><td><span class="pill ${tone[f.status] || ""}">${st[0]}</span></td></tr>`; }).join("") || '<tr><td colspan="7">لا توجد مرافق مطابقة.</td></tr>'; };
   document.getElementById("fq").oninput = draw; document.getElementById("ft").oninput = draw; draw(); sortable(document.getElementById("ftbl"));
   document.getElementById("fx").onclick = () => csvDown("المرافق.csv", ["المرفق", "النوع", "المبنى", "الدور", "السعة", "الحالة"], cur.map((f) => [f.name, f.type_name, f.building, f.floor, f.capacity, (FSTAT[f.status] || [""])[0]]));
-  tocBind(root);
+  tocBind(root); pubReveal();
 }
 function pubReveal() { const els = document.querySelectorAll(".rv:not(.in)"); if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("in")); return; } const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.1 }); els.forEach((e) => io.observe(e)); }
 
@@ -87,5 +87,5 @@ async function renderPeople() {
     document.getElementById("pcount").textContent = `${cur.length} من ${L.length} منسوب`; };
   ["pq", "pc", "ps"].forEach((i) => (document.getElementById(i).oninput = draw)); draw(); sortable(document.getElementById("ptbl"));
   document.getElementById("px").onclick = () => csvDown("المنسوبون.csv", ["الاسم", "الوظيفة", "التخصص", "الفئة"], cur.map((x) => [x.name, x.job_title, x.specialty, PUBX[x.category]]));
-  tocBind(root);
+  tocBind(root); pubReveal();
 }
