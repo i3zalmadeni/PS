@@ -1,30 +1,29 @@
-# واجهة النواة الرقمية (core-api)
+# واجهة التكامل – core-api (الإصدار 2)
 
 العنوان: `https://kbhovmnvqzgihhyibqkq.supabase.co/functions/v1/core-api`
+المصادقة: ترويسة `x-system-key` بمفتاح النظام (يُنشأ من «إعدادات النواة والتكامل»، ويظهر مرة واحدة، ويُخزَّن مجزّأً SHA-256).
+الواجهة **للقراءة فقط**: أي طريقة غير GET على `/v1/*` تُرفض (405). لا تُعاد بيانات التواصل (جوال، بريد، عنوان، أولياء أمور).
 
-## مبادئ
-- لكل نظام سجل في جدول `systems` ومفتاح خاص يُولَّد من «مركز الربط» ويظهر مرة واحدة. يُخزَّن هاش SHA-256 فقط.
-- يُرسل المفتاح في الترويسة `x-system-key`. كل مسارات `/v1` للقراءة (GET).
-- لكل نظام نطاقات (scopes): `staff:read`، `staff:contact`، `teams:read`، `identity:verify`.
-- الأنظمة الأخرى تحتفظ بمعرّف المنسوب `staff.id` فقط، وتسترجع بياناته من النواة عند الحاجة، وتحتفظ ببياناتها التشغيلية عندها.
-- الترقيم: `limit` (حتى 500) و`offset`.
-
-## المسارات
-| المسار | النطاق | الوصف |
+| النقطة | النطاق | الوصف |
 |---|---|---|
-| `GET /v1/staff?category=&active=all&limit=&offset=` | staff:read | قائمة المنسوبين مع بيانات التدريس |
-| `GET /v1/staff/{id}` | staff:read | منسوب واحد؛ مع `contact` (الرقم الوظيفي والبريد والجوال) إن وُجد النطاق staff:contact |
-| `GET /v1/staff/{id}/memberships` | teams:read | عضويات المنسوب في الفرق مع التواريخ |
-| `GET /v1/teams?type=` | teams:read | الفرق واللجان |
-| `GET /v1/teams/{id}/members?active=all` | teams:read | أعضاء الفريق |
-| `GET /v1/identity/verify?user_id=` أو `?staff_id=` | identity:verify | صلاحية الحساب والأدوار وصلاحيات النظام المستدعي فقط |
+| `GET /v1/school` | school:read | الملف، الأعوام، المراحل، الإحصاءات المحسوبة |
+| `GET /v1/staff?category=&active=all&updated_since=&limit=&offset=` | staff:read | المنسوبون |
+| `GET /v1/staff/{id}` | staff:read | منسوب بالمعرّف الثابت |
+| `GET /v1/students?year=&grade=&updated_since=` | students:read | تسجيل المتعلمين في عام (الحالي افتراضياً) |
+| `GET /v1/facilities?type=&updated_since=` | facilities:read | المرافق |
+| `GET /v1/facilities/{id}` | facilities:read | مرفق مع تجهيزاته |
+| `GET /v1/changes?after=&registry=&limit=` | changes:read | موجز التغييرات (معرّفات فقط) مقيّد بنطاقات النظام |
+| `GET /v1/identity/verify?user_id=|staff_id=` | identity:verify | صلاحية الهوية وأدوار وصلاحيات النظام نفسه |
 
-الأخطاء: `401` مفتاح مفقود أو غير صالح أو النظام موقوف، `403` نطاق ناقص، `404` غير موجود.
+## إشعار التغيير
+يستعلم النظام المستقل دورياً عن `/v1/changes?after=<آخر مؤشر>`؛ يعيد `{id, registry, entity_id, op, changed_at}` و`next_cursor`، ثم يجلب السجل المتغير بنطاقه. يُظهر كل حدث سجلات النطاقات الممنوحة فقط.
 
-## مسارات الإدارة (POST، بجلسة مدير النواة)
-`/admin/create-account` و`/admin/set-status` و`/admin/reset-password`. تُستخدم من صفحة المنسوبين.
+## الأمان والتسجيل
+- مفتاح لكل نظام، ويُدوَّر من لوحة الإدارة فيُبطَل القديم فوراً.
+- نطاق أدنى افتراضي لكل نظام؛ يُمنح الزائد يدوياً.
+- كل طلب (ناجح أو مرفوض بعد المصادقة) يُسجَّل في `system_access_logs`.
+- النظام الموقوف مرفوض (401). المعرّفات UUID ثابتة عبر الأعوام.
+- مسارات `/admin/*` للمستخدم المدير فقط (إنشاء الحسابات وإيقافها وتعيين كلمات المرور).
 
-## إضافة نظام مدرسي جديد
-1. سجّله من «مركز الربط» (معرّف واسم). تُنشأ له صلاحيات الاطلاع والإضافة والتعديل والاعتماد تلقائياً.
-2. ولّد مفتاحه وحدد نطاقاته.
-3. يخزّن النظام `staff.id` كمرجع، ولا ينشئ جدول معلمين خاصاً به.
+## الأخطاء
+`401 missing_system_key | invalid_system_key`، `403 scope_required`، `404 not_found`، `405 read_only_api`، `400 bad_request`.
