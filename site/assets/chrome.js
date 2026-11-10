@@ -12,16 +12,16 @@ const footerHTML = `<footer class="lab-foot"><div class="wrap lf"><div class="lf
 function bindNav() { const b = document.querySelector(".navtoggle"), n = document.querySelector("header nav"); if (b && n) b.onclick = () => { const o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o); }; }
 
 // ===== الموقع العام: ترويسة (النواة يميناً، الصفحات وسطاً، شعار الوزارة يساراً) وديناميكية الصفحات =====
-const PUB_NAV = [["index.html", "الرئيسية"], ["about.html", "عن النواة"], ["login.html", "تسجيل الدخول"]];
+const PUB_NAV = [["index.html", "الرئيسية", "🏠"], ["data.html", "بيانات المدرسة", "📊"], ["about.html", "عن النواة", "ℹ️"], ["login.html", "تسجيل الدخول", "🔑"]];
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">☰</button>
-<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === "login.html" ? 'data-login="1"' : ""}>${n}</a>`).join("")}</nav>${moeHTML}</div></header>`;
+<nav>${PUB_NAV.map(([h, n, e]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === "login.html" ? 'data-login="1"' : ""}><span class="em" aria-hidden="true">${e}</span>${n}</a>`).join("")}</nav>${moeHTML}</div></header>`;
 const CORE_ICON = `<svg class="core-ic" viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18a4ab"/><stop offset="1" stop-color="#0c6f82"/></linearGradient></defs><circle cx="80" cy="80" r="76" fill="#fff"/><g class="ci-ring"><circle cx="80" cy="80" r="62" fill="none" stroke="#4fa39a" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 10.8"/></g><circle cx="80" cy="80" r="42" fill="url(#cg)"/><text x="80" y="101" text-anchor="middle" font-family="Tajawal,Tahoma,Arial,sans-serif" font-size="70" font-weight="800" fill="#fff">ن</text><g class="ci-orb"><circle cx="80" cy="16" r="8" fill="#f0b34a"/><circle cx="24.6" cy="112" r="8" fill="#e0955a"/><circle cx="135.4" cy="112" r="8" fill="#4fa39a"/></g></svg>`;
 function pubInit(active) {
   const h = document.getElementById("hdr"); if (h) h.outerHTML = pubHeader(active);
   const f = document.getElementById("ftr"); if (f) f.outerHTML = footerHTML;
   document.querySelectorAll("[data-core]").forEach((e) => (e.innerHTML = CORE_ICON));
   bindNav();
-  try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) document.querySelectorAll("[data-login]").forEach((a) => { a.textContent = "لوحة التحكم"; a.href = "dashboard.html"; }); } catch (e) {}
+  try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) document.querySelectorAll("[data-login]").forEach((a) => { a.innerHTML = '<span class="em" aria-hidden="true">📊</span>لوحة التحكم'; a.href = "dashboard.html"; }); } catch (e) {}
   const rv = document.querySelectorAll(".rv"), reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
   const count = (el) => { const to = +el.dataset.count, t0 = performance.now(); if (reduce) { el.textContent = to; return; } const step = (t) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
   if (!("IntersectionObserver" in window)) { rv.forEach((e) => e.classList.add("in")); document.querySelectorAll("[data-count]").forEach(count); return; }

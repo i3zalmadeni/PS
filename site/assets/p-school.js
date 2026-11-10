@@ -1,6 +1,6 @@
 const PFIELDS = [["official_name", "الاسم الرسمي *"], ["ministry_no", "الرقم الوزاري"], ["stage", "المرحلة الدراسية"], ["school_type", "نوع المدرسة (حكومية، أهلية…)"], ["gender", "للبنين أو البنات", "gender"],
   ["education_department", "الإدارة التعليمية"], ["education_office", "مكتب التعليم"], ["region", "المنطقة"], ["city", "المدينة"], ["district", "الحي"], ["address", "العنوان"], ["latitude", "خط العرض", "num"], ["longitude", "خط الطول", "num"],
-  ["phone", "الهاتف"], ["email", "البريد الإلكتروني"], ["website", "الموقع الإلكتروني"], ["declared_capacity", "الطاقة الاستيعابية المعلنة (اتركها فارغة للحساب التلقائي)", "num"], ["notes", "ملاحظات", "area"]];
+  ["phone", "الهاتف"], ["email", "البريد الإلكتروني"], ["website", "الموقع الإلكتروني"], ["declared_capacity", "الطاقة الاستيعابية المعلنة (اتركها فارغة للحساب التلقائي)", "num"], ["notes", "ملاحظات", "area"], ["publish_public", "نشر ملخص المدرسة على الموقع العام (الأعداد والمرافق وبيانات المدرسة، دون أي بيانات شخصية)", "bool"]];
 
 boot("school.html", async (m, c) => {
   const canEdit = c.can("school:edit"), canCls = c.can("students:edit");
@@ -22,14 +22,14 @@ boot("school.html", async (m, c) => {
   const rerun = async () => { await load(); paint(); };
 
   function profile(b) {
-    const fld = ([k, l, t]) => `<div class="${t === "area" ? "full" : ""}"><label>${esc(l)}</label>${t === "gender" ? `<select name="${k}" ${canEdit ? "" : "disabled"}><option value="">—</option>${opts(L.gender, P[k])}</select>` : t === "area" ? `<textarea name="${k}" ${canEdit ? "" : "disabled"}>${esc(P[k])}</textarea>` : `<input name="${k}" ${t === "num" ? 'type="number" step="any"' : ""} value="${esc(P[k])}" ${canEdit ? "" : "disabled"}>`}</div>`;
+    const fld = ([k, l, t]) => t === "bool" ? `<div class="full"><label class="chk"><input type="checkbox" name="${k}" ${P[k] !== false ? "checked" : ""} ${canEdit ? "" : "disabled"} style="width:auto"> ${esc(l)}</label></div>` : `<div class="${t === "area" ? "full" : ""}"><label>${esc(l)}</label>${t === "gender" ? `<select name="${k}" ${canEdit ? "" : "disabled"}><option value="">—</option>${opts(L.gender, P[k])}</select>` : t === "area" ? `<textarea name="${k}" ${canEdit ? "" : "disabled"}>${esc(P[k])}</textarea>` : `<input name="${k}" ${t === "num" ? 'type="number" step="any"' : ""} value="${esc(P[k])}" ${canEdit ? "" : "disabled"}>`}</div>`;
     b.innerHTML = `<form id="pf" class="card"><div class="fg">${PFIELDS.map(fld).join("")}</div><p class="err" id="fe"></p><div class="acts mt">${canEdit ? '<button class="btn">حفظ</button>' : ""}<button type="button" class="btn sec" id="hs">سجل التغييرات</button><button type="button" class="btn sec" id="ex">تصدير Excel</button></div></form>`;
     b.querySelector("#hs").onclick = () => showHistory("school_profile", null, "بيانات المدرسة");
-    b.querySelector("#ex").onclick = () => exportXlsx("سجل-المدرسة", PFIELDS.map((f) => f[1].replace(" *", "")), [PFIELDS.map((f) => P[f[0]] ?? "")]);
+    b.querySelector("#ex").onclick = () => exportXlsx("سجل-المدرسة", PFIELDS.filter((f) => f[2] !== "bool").map((f) => f[1].replace(" *", "")), [PFIELDS.filter((f) => f[2] !== "bool").map((f) => P[f[0]] ?? "")]);
     if (!canEdit) return;
     b.querySelector("#pf").onsubmit = async (e) => {
       e.preventDefault(); const v = Object.fromEntries(new FormData(e.target)), patch = { updated_by: c.uid };
-      PFIELDS.forEach(([k, , t]) => { patch[k] = t === "num" ? num(v[k]) : nn(v[k]); });
+      PFIELDS.forEach(([k, , t]) => { patch[k] = t === "bool" ? e.target[k].checked : t === "num" ? num(v[k]) : nn(v[k]); });
       if (!patch.official_name) { b.querySelector("#fe").textContent = "الاسم الرسمي مطلوب"; return; }
       const r = await sb.from("school_profile").update(patch).eq("id", true); if (r.error) { b.querySelector("#fe").textContent = mapErr(r.error); return; }
       toast("تم الحفظ"); await load();

@@ -185,3 +185,24 @@ header .top .moe{order:3;flex:none}
 .bm .ci-ring{animation-duration:26s}.bm .ci-orb{animation-duration:9s}
 .core-ic{filter:drop-shadow(0 14px 26px rgba(7,40,50,.3))}
 .bm svg{width:54px;height:54px}
+
+/* ===== قوائم بالإيموجي وشارات تشغيلية ===== */
+nav .em{display:inline-block;margin-inline-end:6px;font-size:1.05em;transition:transform .2s}nav a:hover .em{transform:translateY(-2px) scale(1.15)}
+header nav a{display:inline-flex;align-items:center}
+.dnav a{display:inline-flex;align-items:center;gap:0}
+.dnav a .em{font-size:1.15rem;margin-inline-end:8px;filter:saturate(1.1)}
+.dnav a:focus-visible,nav a:focus-visible{outline:2px solid #f0b34a;outline-offset:2px}
+.bdg{margin-inline-start:8px;min-width:24px;padding:0 7px;border-radius:99px;background:rgba(240,179,74,.2);color:#f6c25e;font-size:.74rem;font-weight:800;text-align:center;line-height:1.6;border:1px solid rgba(240,179,74,.35)}
+.bdg:empty{display:none}
+.dnav a.on .bdg{background:#f0b34a;color:#3b2a06;border-color:transparent}
+@media (max-width:860px){nav .em{margin-inline-end:8px}}
+/* ===== صفحات البيانات العامة ===== */
+.hero.slim{padding:34px 0 42px}.hero.slim h1{font-size:clamp(1.6rem,4vw,2.3rem)}
+.hero.slim .core-ic{width:min(150px,40vw)}
+.em2{font-size:1.5rem;background:rgba(255,255,255,.75)}
+.kstrip2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.mt2{margin-top:18px}
+.pubcard h2{margin-bottom:2px}.yr2{background:var(--c4b);color:var(--c4f);border-radius:99px;padding:5px 14px;font-weight:700;font-size:.9rem}.yr2 i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#f0b34a;margin-inline-end:8px;box-shadow:0 0 0 4px rgba(240,179,74,.3)}
+.fac .meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;color:var(--ink2);font-size:.84rem}.fac .meta span{background:var(--soft);border-radius:99px;padding:2px 10px}
+.empty{text-align:center;padding:40px}.empty .big{font-size:2.6rem}
+.live-note{text-align:center;margin:10px 0 0}
