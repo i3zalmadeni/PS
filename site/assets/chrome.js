@@ -15,10 +15,10 @@ const footerHTML = `<footer class="lab-foot"><div class="wrap lf"><div class="lf
 function bindNav() { const b = document.querySelector(".navtoggle"), n = document.querySelector("header nav"); if (b && n) b.onclick = () => { const o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o); }; }
 
 // ===== الموقع العام: ترويسة (النواة يميناً، الصفحات وسطاً، شعار الوزارة يساراً) وديناميكية الصفحات =====
-const PUB_NAV = [["home", "الرئيسية"], ["about", "عن النواة"], ["data", "بيانات المدرسة"], ["people", "منسوبو المدرسة"]];
+const PUB_NAV = [["index.html", "الرئيسية"], ["about.html", "عن النواة"], ["data.html", "بيانات المدرسة"], ["people.html", "منسوبو المدرسة"]];
 const headMoe = '<span class="moe hm"><b>وزارة التعليم</b><small>Ministry of Education</small></span>';
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-<nav>${PUB_NAV.map(([h, n]) => `<a href="${active === "index.html" ? "" : "index.html"}#${h}" data-s="${h}">${n}</a>`).join("")}</nav>${headMoe}<a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a></div></header>`;
+<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${n}</a>`).join("")}</nav>${headMoe}<a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a></div></header>`;
 // شريط داكن لأقسام الصفحة الحالية (يُبنى من العناوين) مع تمييز القسم الظاهر أثناء التمرير
 function pubSubnav() {
   const bar = document.getElementById("pubsub"); if (!bar) return;
