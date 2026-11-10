@@ -1,0 +1,10 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>الفرق واللجان – النواة الرقمية</title><link rel="stylesheet" href="assets/core.css"></head><body><div id="shell"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/core.js"></script>
+<script>boot("teams.html", async (m) => {
+
+const { data: rows } = await sb.from("teams").select("name,status,team_types(name_ar),team_memberships(id,ended_on)").order("created_at", { ascending: false });
+m.innerHTML = head("الفرق واللجان", "إدارة مركزية للفرق والعضويات") + (rows && rows.length ? `<table><thead><tr><th>الاسم</th><th>النوع</th><th>الأعضاء النشطون</th><th>الحالة</th></tr></thead><tbody>${rows.map((r) =>
+  `<tr><td>${esc(r.name)}</td><td>${esc(r.team_types?.name_ar)}</td><td>${r.team_memberships.filter((x) => !x.ended_on).length}</td><td>${esc(r.status)}</td></tr>`).join("")}</tbody></table>` : `<div class="card">لا توجد فرق بعد.</div>`);
+});</script></body></html>
