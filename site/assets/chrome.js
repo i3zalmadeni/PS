@@ -14,10 +14,10 @@ const footerHTML = `<footer class="lab-foot"><div class="wrap lf"><div class="lf
 function bindNav() { const b = document.querySelector(".navtoggle"), n = document.querySelector("header nav"); if (b && n) b.onclick = () => { const o = n.classList.toggle("open"); b.setAttribute("aria-expanded", o); }; }
 
 // ===== الموقع العام: ترويسة (النواة يميناً، الصفحات وسطاً، شعار الوزارة يساراً) وديناميكية الصفحات =====
-const PUB_NAV = [["index.html", "الرئيسية", "home"], ["data.html", "بيانات المدرسة", "chart"], ["people.html", "منسوبو المدرسة", "users"], ["about.html", "عن النواة", "info"], ["login.html", "تسجيل الدخول", "key"]];
+const PUB_NAV = [["index.html", "الرئيسية"], ["data.html", "بيانات المدرسة"], ["people.html", "منسوبو المدرسة"], ["about.html", "عن النواة"]];
+const headMoe = '<span class="moe hm"><b>وزارة التعليم</b><small>Ministry of Education</small></span>';
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-<nav>${PUB_NAV.map(([h, n, e]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""} ${h === "login.html" ? 'data-login="1"' : ""}>${ico(e)}${n}</a>`).join("")}</nav>${moeHTML}</div>
-<div class="dnav" id="pubsub" hidden><div class="wrap"><div class="dnav-in"></div></div></div></header>`;
+<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${n}</a>`).join("")}</nav><a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a>${headMoe}</div></header>`;
 // شريط داكن لأقسام الصفحة الحالية (يُبنى من العناوين) مع تمييز القسم الظاهر أثناء التمرير
 function pubSubnav() {
   const bar = document.getElementById("pubsub"); if (!bar) return;
@@ -37,7 +37,7 @@ function pubInit(active) {
   document.querySelectorAll("[data-core]").forEach((e) => (e.innerHTML = CORE_ICON));
   document.querySelectorAll("[data-ico]").forEach((e) => (e.innerHTML = ico(e.dataset.ico)));
   bindNav(); pubSubnav();
-  try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) document.querySelectorAll("[data-login]").forEach((a) => { a.innerHTML = ico("chart") + "لوحة التحكم"; a.href = "dashboard.html"; }); } catch (e) {}
+  try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) document.querySelectorAll("[data-login]").forEach((a) => { a.textContent = "لوحة التحكم"; a.href = "dashboard.html"; }); } catch (e) {}
   const rv = document.querySelectorAll(".rv"), reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
   const count = (el) => { const to = +el.dataset.count, t0 = performance.now(); if (reduce) { el.textContent = to; return; } const step = (t) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
   if (!("IntersectionObserver" in window)) { rv.forEach((e) => e.classList.add("in")); document.querySelectorAll("[data-count]").forEach(count); return; }

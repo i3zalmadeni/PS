@@ -96,7 +96,7 @@ async function boot(page, render, o = {}) {
   const items = NAV.filter((n) => !n[4] || (n[4] === "admin" ? isAdmin : can(n[4])));
   document.getElementById("shell").innerHTML =
     `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-     <nav><a href="index.html">${ico("globe")}الموقع</a><a href="data.html">${ico("chart")}بيانات المدرسة</a><a href="dashboard.html" class="on">${ico("compass")}لوحة التحكم</a><span class="who">${ico("user")}${esc(me.full_name)}</span><a href="#" id="out">${ico("logout")}خروج</a></nav>${moeHTML}</div>
+     <nav><a href="index.html">الموقع</a><a href="data.html">بيانات المدرسة</a><a href="dashboard.html" class="on">لوحة التحكم</a></nav><span class="who">${ico("user")}${esc(me.full_name)}</span><a class="loginbtn" href="#" id="out">خروج</a>${headMoe}</div>
      <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}>${ico(e)}${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
   document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
   sb.rpc("school_stats").then(({ data }) => { if (data) document.querySelectorAll("[data-b]").forEach((e) => { const v = data[e.dataset.b]; if (v !== undefined) e.textContent = v; }); });
