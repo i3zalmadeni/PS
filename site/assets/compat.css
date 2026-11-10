@@ -36,3 +36,6 @@ body.pg .login{max-width:420px;margin:6vh auto;padding:0 16px}
 .sb .who{color:#d3e8ec;font-size:.88rem;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
 .sb .sbout{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:7px 14px;border-radius:10px;font:inherit;cursor:pointer}.sb .sbout:hover{background:rgba(255,255,255,.18)}
 @media(max-width:860px){.sb{flex-wrap:wrap}#menu{flex:1 1 100%;order:2}.sb .who{display:none}#menu>a{padding:9px 10px;font-size:.9rem}.astick{position:static}}
+body.pg .row select,body.pg .row input:not([type=text]){width:auto;min-width:120px}
+body.pg form[style*="display:flex"] input{flex:1;width:auto}
+body.pg details summary{cursor:pointer;list-style:none}

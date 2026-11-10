@@ -30,8 +30,8 @@ const ICO = {
 };
 const ic = (k) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICO[k]}</svg>`;
 /* الشريط الإضافي: أقسام لوحة التحكم بحسب الدور (مثل لوحة التقويم الذاتي الذكي) */
-const SUB_ADMIN = [["dashboard.html", "لوحة المؤشرات", "dash"], ["admin-users.html", "المعلمون والحسابات", "add"], ["review.html", "الاعتمادات", "check", "pending"], ["teachers.html", "دليل المعلمين", "users"], ["profile.html", "ملفي المهني", "user", "mine"], ["achievements.html", "إنجازاتي", "star", "mine"]];
-const SUB_TEACHER = [["home.html", "الرئيسية", "home"], ["profile.html", "ملفي المهني", "user"], ["growth.html", "النمو المهني", "grow"], ["achievements.html", "الإنجازات والشواهد", "star"], ["teachers.html", "المعلمون", "users"]];
+const SUB_ADMIN = [["dashboard.html", "لوحة المؤشرات", "dash"], ["admin-users.html", "المعلمون والحسابات", "add"], ["review.html", "الاعتمادات", "check", "pending"], ["plc.html", "مجتمعات التعلم", "users"], ["teachers.html", "دليل المعلمين", "users"], ["profile.html", "ملفي المهني", "user", "mine"], ["achievements.html", "إنجازاتي", "star", "mine"]];
+const SUB_TEACHER = [["home.html", "الرئيسية", "home"], ["profile.html", "ملفي المهني", "user"], ["growth.html", "النمو المهني", "grow"], ["achievements.html", "الإنجازات والشواهد", "star"], ["plc.html", "مجتمعات التعلم", "users"], ["teachers.html", "المعلمون", "users"]];
 const PUBNAV = [["index.html", "الرئيسية"], ["about.html", "عن المدرسة"], ["staff.html", "المعلمون"], ["practices.html", "الممارسات"], ["programs.html", "البرامج"]];
 
 /** ترويسة الموقع الموحّدة (نفس هوية التقويم الذاتي الذكي): القائمة العلوية + الشريط الإضافي. */
