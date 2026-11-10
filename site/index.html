@@ -1,63 +1,38 @@
 <!doctype html>
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0f8a94">
-<title>مجتمع المعلمين الذكي | متوسطة لبيد بن ربيعة</title>
-<meta name="description" content="مجتمع مهني رقمي لمعلمي مدرسة لبيد بن ربيعة المتوسطة: ملفات مهنية، ممارسات تعليمية، ومجتمعات تعلم.">
+<title>الرئيسية | مجتمع المعلمين الذكي – متوسطة لبيد بن ربيعة</title>
+<meta name="description" content="مجتمع مهني رقمي لمعلمي مدرسة لبيد بن ربيعة المتوسطة: ملفات مهنية وممارسات وبرامج ومجتمعات تعلم.">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/landing.css">
+<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/site.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js"></script><script src="assets/footer.js"></script>
-</head><body class="pub">
-<header><div class="wrap top">
-  <a class="bm" href="#top"><img src="assets/favicon.svg" width="40" height="40" alt=""><span><b>مجتمع المعلمين الذكي</b><small>متوسطة لبيد بن ربيعة</small></span></a>
-  <button class="navtoggle" id="navToggle" type="button" aria-label="القائمة" aria-expanded="false" aria-controls="nav"><svg class="ico b" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><svg class="ico x" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-  <nav id="nav"><a href="#top" class="on">الرئيسية</a><a href="#about">عن المدرسة</a><a href="#platform">المنصة</a><a href="#staff">طاقم المدرسة</a><a href="login.html" class="navbtn">دخول</a></nav>
-  <span class="moe"><b>وزارة التعليم</b><small>Ministry of Education</small></span>
-</div></header>
-<main class="wrap" id="top">
-  <div class="hero lhero"><div><span class="chip">مدرسة لبيد بن ربيعة المتوسطة • 1448هـ</span>
-    <h1>مجتمع <span class="g">المعلمين</span> الذكي</h1>
-    <p>مجتمع مهني رقمي يجمع معلمي المدرسة: ملف مهني حيّ لكل معلم، وممارسات تعليمية موثقة، ومجتمعات تعلم تتبادل الخبرة وتقيس الأثر.</p>
-    <div class="acts"><a class="btn gold" href="login.html">دخول المعلمين</a><a class="btn" href="#about">تعرّف على المدرسة</a></div></div>
-    <div class="pills" aria-hidden="true"><span class="pill">ملف مهني حيّ</span><span class="pill">ممارسات موثقة</span><span class="pill">مجتمعات تعلم</span><span class="pill">شواهد معتمدة</span></div></div>
+<script src="assets/config.js"></script><script src="assets/public.js"></script><script src="assets/footer.js"></script>
+</head><body><script>
+const tcard = (t) => `<a class="box" href="teacher.html?id=${esc(t.id)}"><div class="tcard"><div class="av" aria-hidden="true">${esc(initial(t.full_name))}</div><div class="meta"><h3>${esc(t.full_name)}</h3><p>${esc([t.specialty, t.stage].filter(Boolean).join(" • "))}</p>
+${(t.skills || []).map((s) => `<span class="tag">${esc(s)}</span>`).join("")}</div></div>
+<div class="nums"><span><b>${t.achievements_count ?? 0}</b> إنجاز معتمد</span><span><b>${t.practices_count ?? 0}</b> ممارسة</span>${t.years_experience != null ? `<span><b>${t.years_experience}</b> سنة خبرة</span>` : ""}</div></a>`;
+const pcard = (p) => `<div class="box"><span class="tag">${esc(p.category || "ممارسة")}</span><h3>${esc(p.title)}</h3><p>${esc([p.subject, p.grade].filter(Boolean).join(" • "))}</p><p>${esc(p.objective || "")}</p>
+${p.results ? `<p><b>النتائج:</b> ${esc(p.results)}</p>` : ""}<p class="muted">بواسطة <a href="teacher.html?id=${esc(p.author_id)}">${esc(short(p.author_name))}</a> • ${fmt(p.published_at)}</p></div>`;
+const gcard = (g) => `<div class="box"><span class="tag ${g.status === "completed" ? "ok" : "gold"}">${esc(L.pstat[g.status] || g.status)}</span><span class="tag info">${esc(L.prog[g.program_type] || "")}</span><h3>${esc(g.title)}</h3><p>${esc(g.description || "")}</p>
+<p class="muted">${fmt(g.starts_at)} • ${g.duration_minutes || "—"} دقيقة • ${esc(g.location || "")}</p><p class="muted">المقدّم: ${g.presenter_id ? `<a href="teacher.html?id=${esc(g.presenter_id)}">${esc(short(g.presenter_name))}</a>` : esc(g.presenter_name || "—")}</p>
+${g.impact_summary ? `<p><b>الأثر:</b> ${esc(g.impact_summary)}</p>` : ""}${g.status === "completed" ? `<p class="muted">الحضور: ${g.attended}</p>` : ""}</div>`;
 
-  <section id="about"><span class="kick">عن المدرسة</span><h2>مدرسة لبيد بن ربيعة المتوسطة</h2>
-    <p class="lead">مدرسة متوسطة تؤمن بأن جودة التعليم تبدأ من نمو معلميها. رؤيتنا أن نكون مجتمعًا مهنيًا متعلمًا، يستثمر خبرات معلميه ويوثق ممارساتهم ويقيس أثر التطوير على التعليم والتعلم.</p>
-    <div class="lead-card"><div class="av" aria-hidden="true">خ</div><div><b>خالد بن عبدالرحمن الباش</b><br><span style="color:var(--muted)">مدير المدرسة</span></div></div>
-  </section>
-
-  <section id="platform"><span class="kick">المنصة</span><h2>ما الذي يقدمه المجتمع؟</h2>
-    <div class="cards">
-      <div class="card c0"><div class="ic">🪪</div><h3>الملف المهني</h3><p>مؤهلات ومهارات وإنجازات كل معلم في مكان واحد، بشواهدها.</p></div>
-      <div class="card c1"><div class="ic">🌱</div><h3>النمو المهني</h3><p>أهداف فردية مرتبطة بخطة المدرسة، ومتابعة من التخطيط إلى الأثر.</p></div>
-      <div class="card c2"><div class="ic">💡</div><h3>الممارسات التعليمية</h3><p>بنك ممارسات يوثقها المعلمون ويطبقها زملاؤهم.</p></div>
-      <div class="card c3"><div class="ic">🤝</div><h3>مجتمعات التعلم</h3><p>مجتمعات مهنية بخطط واجتماعات ومخرجات يمكن قياسها.</p></div>
-      <div class="card c4"><div class="ic">✅</div><h3>الشواهد والاعتماد</h3><p>كل إنجاز بشواهده، واعتماد من الإدارة بقرار وتاريخ محفوظين.</p></div>
-      <div class="card c5"><div class="ic">📊</div><h3>مؤشرات للتطوير</h3><p>أرقام بمصادرها لدعم قرارات التطوير، وليست تقويمًا للأداء الوظيفي.</p></div>
-    </div></section>
-
-  <section id="staff"><span class="kick">طاقم المدرسة</span><h2>معلمو المدرسة</h2>
-    <p class="lead">المعلمون المسجلون في المجتمع. تظهر الأسماء والتخصصات فقط.</p>
-    <div class="staff" id="sg" aria-live="polite"></div></section>
-
-  <div class="cta"><div><h2>هل أنت من معلمي المدرسة؟</h2><p>سجّل الدخول لإدارة ملفك المهني والمشاركة في المجتمع.</p></div><a class="btn gold" href="login.html">دخول المنصة</a></div>
-</main>
-
-<script>
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
-(async () => {
-  const g = document.getElementById("sg");
-  try {
-    const { data, error } = await sb.rpc("public_staff");
-    if (error) throw error;
-    if (!data || !data.length) { g.outerHTML = '<div class="empty">سيظهر هنا طاقم المدرسة بعد إضافة المعلمين من لوحة التحكم.</div>'; return; }
-    g.innerHTML = data.map((t) => `<div class="p"><div class="av" aria-hidden="true">${esc([...t.full_name.replace(/^(أ\.|د\.|الأستاذ|الأستاذة)\s*/, "")][0] || "؟")}</div><div><b>${esc(t.full_name)}</b><span>${esc([t.specialty, t.stage].filter(Boolean).join(" • ") || "معلم")}</span></div></div>`).join("");
-  } catch (e) { g.outerHTML = '<div class="empty">تعذر تحميل قائمة الطاقم الآن.</div>'; }
-})();
-
-(() => { const btn = document.getElementById("navToggle"), hd = btn.closest("header"), set = (o) => { hd.classList.toggle("open", o); btn.setAttribute("aria-expanded", o ? "true" : "false"); };
-  btn.onclick = () => set(!hd.classList.contains("open")); document.getElementById("nav").onclick = (e) => { if (e.target.closest("a")) set(false); }; })();
+pubPage("index.html", async (v) => {
+  const [st, ts, ps, gs] = await Promise.all([rpc("public_stats"), rpc("public_teachers_list"), rpc("public_practices"), rpc("public_programs")]);
+  const up = gs.filter((g) => g.status !== "completed").reverse().slice(0, 3);
+  v.innerHTML = `<div class="hero lhero"><div><span class="chip">مدرسة لبيد بن ربيعة المتوسطة • 1448هـ</span>
+  <h1>مجتمع <span class="gold">المعلمين</span> الذكي</h1>
+  <p>مجتمع مهني رقمي يجمع معلمي المدرسة: ملف مهني حيّ لكل معلم، وممارسات تعليمية موثقة، ومجتمعات تعلم تتبادل الخبرة وتقيس الأثر.</p>
+  <div class="acts" style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn gold" href="staff.html">تعرّف على معلمينا</a><a class="btn" href="about.html">عن المدرسة</a></div></div>
+  <div class="pills" aria-hidden="true" style="flex-direction:column;align-items:flex-start"><span class="pill">ملف مهني حيّ</span><span class="pill">ممارسات موثقة</span><span class="pill">مجتمعات تعلم</span><span class="pill">شواهد معتمدة</span></div></div>
+  ${ts.some((t) => t.is_demo) ? demoNote : ""}
+  <div class="stats"><div class="stat"><b>${st.teachers}</b><span>معلمًا في المجتمع</span></div><div class="stat"><b>${st.achievements}</b><span>إنجازًا معتمدًا</span></div><div class="stat"><b>${st.practices}</b><span>ممارسة موثقة</span></div><div class="stat"><b>${st.programs}</b><span>برنامجًا مهنيًا</span></div><div class="stat"><b>${st.plcs}</b><span>مجتمع تعلم نشط</span></div></div>
+  <section class="s"><span class="kick">طاقم المدرسة</span><h2>تعرّف على معلمينا</h2><div class="g3">${ts.slice(0, 6).map(tcard).join("") || '<div class="empty">سيظهر الطاقم هنا بعد إضافة المعلمين.</div>'}</div>
+  <p style="margin-top:14px"><a class="btn pri" href="staff.html">كل المعلمين (${ts.length})</a></p></section>
+  <section class="s"><span class="kick">من الميدان</span><h2>أحدث الممارسات التعليمية</h2><div class="g3">${ps.slice(0, 3).map(pcard).join("") || '<div class="empty">لا توجد ممارسات منشورة بعد.</div>'}</div><p style="margin-top:14px"><a class="btn" href="practices.html">كل الممارسات</a></p></section>
+  <section class="s"><span class="kick">البرامج والفعاليات</span><h2>القادم في المجتمع</h2><div class="g3">${up.map(gcard).join("") || '<div class="empty">لا توجد برامج قادمة الآن.</div>'}</div><p style="margin-top:14px"><a class="btn" href="programs.html">كل البرامج</a></p></section>
+  <div class="cta"><div><h2>هل أنت من معلمي المدرسة؟</h2><p>سجّل الدخول لإدارة ملفك المهني والمشاركة في المجتمع.</p></div><a class="btn gold" href="login.html">دخول المعلمين</a></div>`;
+});
 </script></body></html>

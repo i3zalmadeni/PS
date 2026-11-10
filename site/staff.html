@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f8a94">
+<title>المعلمون | مجتمع المعلمين الذكي – متوسطة لبيد بن ربيعة</title>
+<meta name="description" content="طاقم معلمي مدرسة لبيد بن ربيعة المتوسطة وملفاتهم المهنية.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/site.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/public.js"></script><script src="assets/footer.js"></script>
+</head><body><script>
+const tcard = (t) => `<a class="box" href="teacher.html?id=${esc(t.id)}"><div class="tcard"><div class="av" aria-hidden="true">${esc(initial(t.full_name))}</div><div class="meta"><h3>${esc(t.full_name)}</h3><p>${esc([t.specialty, t.stage].filter(Boolean).join(" • "))}</p>
+${(t.skills || []).map((s) => `<span class="tag">${esc(s)}</span>`).join("")}</div></div>
+<div class="nums"><span><b>${t.achievements_count ?? 0}</b> إنجاز معتمد</span><span><b>${t.practices_count ?? 0}</b> ممارسة</span>${t.years_experience != null ? `<span><b>${t.years_experience}</b> سنة خبرة</span>` : ""}</div></a>`;
+const pcard = (p) => `<div class="box"><span class="tag">${esc(p.category || "ممارسة")}</span><h3>${esc(p.title)}</h3><p>${esc([p.subject, p.grade].filter(Boolean).join(" • "))}</p><p>${esc(p.objective || "")}</p>
+${p.results ? `<p><b>النتائج:</b> ${esc(p.results)}</p>` : ""}<p class="muted">بواسطة <a href="teacher.html?id=${esc(p.author_id)}">${esc(short(p.author_name))}</a> • ${fmt(p.published_at)}</p></div>`;
+const gcard = (g) => `<div class="box"><span class="tag ${g.status === "completed" ? "ok" : "gold"}">${esc(L.pstat[g.status] || g.status)}</span><span class="tag info">${esc(L.prog[g.program_type] || "")}</span><h3>${esc(g.title)}</h3><p>${esc(g.description || "")}</p>
+<p class="muted">${fmt(g.starts_at)} • ${g.duration_minutes || "—"} دقيقة • ${esc(g.location || "")}</p><p class="muted">المقدّم: ${g.presenter_id ? `<a href="teacher.html?id=${esc(g.presenter_id)}">${esc(short(g.presenter_name))}</a>` : esc(g.presenter_name || "—")}</p>
+${g.impact_summary ? `<p><b>الأثر:</b> ${esc(g.impact_summary)}</p>` : ""}${g.status === "completed" ? `<p class="muted">الحضور: ${g.attended}</p>` : ""}</div>`;
+
+pubPage("staff.html", async (v) => {
+  const ts = await rpc("public_teachers_list");
+  const specs = [...new Set(ts.map((t) => t.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
+  v.innerHTML = `<div class="pagehead"><span class="kick">طاقم المدرسة</span><h1>المعلمون</h1><p>اضغط على أي معلم لعرض ملفه المهني الكامل: نبذته وإنجازاته وممارساته ونموه المهني.</p></div>
+  ${ts.some((t) => t.is_demo) ? demoNote : ""}
+  <div class="tools"><input id="q" type="search" placeholder="ابحث بالاسم أو التخصص أو المهارة…" aria-label="بحث"><select id="sp" aria-label="التخصص"><option value="">كل التخصصات</option>${specs.map((s) => `<option>${esc(s)}</option>`).join("")}</select>
+  <select id="so" aria-label="الترتيب"><option value="n">الترتيب: الاسم</option><option value="a">الأكثر إنجازات</option><option value="p">الأكثر ممارسات</option></select></div>
+  <p class="muted" id="cnt" aria-live="polite"></p><div class="g3" id="gr"></div>`;
+  const draw = () => { const q = document.getElementById("q").value.trim(), sp = document.getElementById("sp").value, so = document.getElementById("so").value;
+    let r = ts.filter((t) => (!sp || t.specialty === sp) && (!q || [t.full_name, t.specialty, t.stage, ...(t.skills || [])].join(" ").includes(q)));
+    r = [...r].sort((a, b) => so === "a" ? b.achievements_count - a.achievements_count : so === "p" ? b.practices_count - a.practices_count : a.full_name.localeCompare(b.full_name, "ar"));
+    document.getElementById("cnt").textContent = `${r.length} من ${ts.length} معلمًا`;
+    document.getElementById("gr").innerHTML = r.map(tcard).join("") || '<div class="empty" style="grid-column:1/-1">لا نتائج مطابقة.</div>'; };
+  ["q", "sp", "so"].forEach((i) => document.getElementById(i).addEventListener("input", draw)); draw();
+});
+</script></body></html>

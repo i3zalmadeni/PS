@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0f8a94">
+<title>البرامج والفعاليات | مجتمع المعلمين الذكي – متوسطة لبيد بن ربيعة</title>
+<meta name="description" content="البرامج والفعاليات المهنية في مدرسة لبيد بن ربيعة المتوسطة.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/site.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="assets/config.js"></script><script src="assets/public.js"></script><script src="assets/footer.js"></script>
+</head><body><script>
+const tcard = (t) => `<a class="box" href="teacher.html?id=${esc(t.id)}"><div class="tcard"><div class="av" aria-hidden="true">${esc(initial(t.full_name))}</div><div class="meta"><h3>${esc(t.full_name)}</h3><p>${esc([t.specialty, t.stage].filter(Boolean).join(" • "))}</p>
+${(t.skills || []).map((s) => `<span class="tag">${esc(s)}</span>`).join("")}</div></div>
+<div class="nums"><span><b>${t.achievements_count ?? 0}</b> إنجاز معتمد</span><span><b>${t.practices_count ?? 0}</b> ممارسة</span>${t.years_experience != null ? `<span><b>${t.years_experience}</b> سنة خبرة</span>` : ""}</div></a>`;
+const pcard = (p) => `<div class="box"><span class="tag">${esc(p.category || "ممارسة")}</span><h3>${esc(p.title)}</h3><p>${esc([p.subject, p.grade].filter(Boolean).join(" • "))}</p><p>${esc(p.objective || "")}</p>
+${p.results ? `<p><b>النتائج:</b> ${esc(p.results)}</p>` : ""}<p class="muted">بواسطة <a href="teacher.html?id=${esc(p.author_id)}">${esc(short(p.author_name))}</a> • ${fmt(p.published_at)}</p></div>`;
+const gcard = (g) => `<div class="box"><span class="tag ${g.status === "completed" ? "ok" : "gold"}">${esc(L.pstat[g.status] || g.status)}</span><span class="tag info">${esc(L.prog[g.program_type] || "")}</span><h3>${esc(g.title)}</h3><p>${esc(g.description || "")}</p>
+<p class="muted">${fmt(g.starts_at)} • ${g.duration_minutes || "—"} دقيقة • ${esc(g.location || "")}</p><p class="muted">المقدّم: ${g.presenter_id ? `<a href="teacher.html?id=${esc(g.presenter_id)}">${esc(short(g.presenter_name))}</a>` : esc(g.presenter_name || "—")}</p>
+${g.impact_summary ? `<p><b>الأثر:</b> ${esc(g.impact_summary)}</p>` : ""}${g.status === "completed" ? `<p class="muted">الحضور: ${g.attended}</p>` : ""}</div>`;
+
+pubPage("programs.html", async (v) => {
+  const gs = await rpc("public_programs");
+  const up = gs.filter((g) => g.status !== "completed").sort((a, b) => new Date(a.starts_at) - new Date(b.starts_at)), done = gs.filter((g) => g.status === "completed");
+  v.innerHTML = `<div class="pagehead"><span class="kick">البرامج والفعاليات</span><h1>برامج المجتمع المهني</h1><p>دورات وورش ولقاءات ينظمها المجتمع أو يقدمها زملاؤه.</p></div>
+  <section class="s" style="padding-top:20px"><h2>القادمة (${up.length})</h2><div class="g3">${up.map(gcard).join("") || '<div class="empty">لا توجد برامج قادمة الآن.</div>'}</div></section>
+  <section class="s"><h2>المنفّذة (${done.length})</h2><div class="g3">${done.map(gcard).join("") || '<div class="empty">لا توجد برامج منفذة بعد.</div>'}</div></section>`;
+});
+</script></body></html>
