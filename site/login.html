@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>الدخول – مجتمع المعلمين الذكي</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/app.css">
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/app.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="assets/config.js"></script><script src="assets/app.js"></script>
 </head><body><div class="login"><div class="card"><h2 class="title">مجتمع المعلمين الذكي</h2>
@@ -15,13 +15,13 @@
 
 const q = new URLSearchParams(location.search);
 if (q.get("e") === "inactive") document.getElementById("m").textContent = "الحساب غير مفعّل. تواصل مع المنسق.";
-sb.auth.getSession().then(({ data }) => { if (data.session) location.replace("index.html"); });
+sb.auth.getSession().then(({ data }) => { if (data.session) location.replace("home.html"); });
 document.getElementById("f").onsubmit = async (ev) => {
   ev.preventDefault(); const m = document.getElementById("m"), b = document.getElementById("b"); m.textContent = ""; b.disabled = true;
   const { error } = await sb.auth.signInWithPassword({ email: e.value.trim(), password: p.value });
   b.disabled = false;
   if (error) { m.textContent = "بيانات الدخول غير صحيحة."; return; }
-  location.replace("index.html");
+  location.replace("home.html");
 };
 document.getElementById("fg").onclick = async (ev) => {
   ev.preventDefault(); const m = document.getElementById("m");

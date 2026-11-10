@@ -22,7 +22,7 @@ const badge = (st) => `<span class="badge ${STATUS_CLASS[st] || ""}">${esc(STATU
 const isReviewer = (u) => ["system_admin", "principal", "coordinator"].includes(u.role);
 
 const NAV = [
-  ["index.html", "الرئيسية"], ["teachers.html", "المعلمون"], ["profile.html", "ملفي المهني"],
+  ["home.html", "الرئيسية"], ["teachers.html", "المعلمون"], ["profile.html", "ملفي المهني"],
   ["growth.html", "النمو المهني"], ["achievements.html", "الإنجازات والشواهد"],
   ["review.html", "مراجعة الاعتمادات", "reviewer"],
   ["admin-users.html", "إدارة المعلمين والحسابات", "reviewer"],
