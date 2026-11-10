@@ -76,9 +76,9 @@ async function showHistory(table, id, title) {
   md.el.querySelector("#cx").onclick = md.close;
 }
 
-const NAV = [["dashboard.html", "الرئيسية", "🏠", "ملخص النواة والأعداد المحسوبة"], ["school.html", "سجل المدرسة", "🏫", "الملف والقيادة والأعوام والمراحل والفصول"], ["staff.html", "سجل المنسوبين", "👥", "الهيئة التعليمية والإدارية والمساندة", null, "personnel_total"],
-  ["students.html", "سجل المتعلمين", "🎓", "الهوية والتسجيل لكل عام", "students:view", "students_total"], ["facilities.html", "سجل المرافق", "🏢", "الموقع والمسؤولون والتجهيزات", null, "facilities_total"],
-  ["access.html", "المستخدمون والصلاحيات", "🔐", "الأدوار والصلاحيات", "admin"], ["settings.html", "إعدادات النواة والتكامل", "⚙️", "الأنظمة والمفاتيح والسجلات", "admin"]];
+const NAV = [["dashboard.html", "الرئيسية", "home", "ملخص النواة والأعداد المحسوبة"], ["school.html", "سجل المدرسة", "school", "الملف والقيادة والأعوام والمراحل والفصول"], ["staff.html", "سجل المنسوبين", "users", "الهيئة التعليمية والإدارية والمساندة", null, "personnel_total"],
+  ["students.html", "سجل المتعلمين", "cap", "الهوية والتسجيل لكل عام", "students:view", "students_total"], ["facilities.html", "سجل المرافق", "building", "الموقع والمسؤولون والتجهيزات", null, "facilities_total"],
+  ["access.html", "المستخدمون والصلاحيات", "lock", "الأدوار والصلاحيات", "admin"], ["settings.html", "إعدادات النواة والتكامل", "gear", "الأنظمة والمفاتيح والسجلات", "admin"]];
 async function boot(page, render, o = {}) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { location.replace("login.html"); return; }
@@ -95,9 +95,9 @@ async function boot(page, render, o = {}) {
   const ctx = { me, isAdmin, can, uid: session.user.id };
   const items = NAV.filter((n) => !n[4] || (n[4] === "admin" ? isAdmin : can(n[4])));
   document.getElementById("shell").innerHTML =
-    `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">☰</button>
-     <nav><a href="index.html"><span class="em">🌐</span>الموقع</a><a href="data.html"><span class="em">📊</span>بيانات المدرسة</a><a href="dashboard.html" class="on"><span class="em">🧭</span>لوحة التحكم</a><span class="who">👤 ${esc(me.full_name)}</span><a href="#" id="out"><span class="em">🚪</span>خروج</a></nav>${moeHTML}</div>
-     <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}><span class="em" aria-hidden="true">${e}</span>${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
+    `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
+     <nav><a href="index.html">${ico("globe")}الموقع</a><a href="data.html">${ico("chart")}بيانات المدرسة</a><a href="dashboard.html" class="on">${ico("compass")}لوحة التحكم</a><span class="who">${ico("user")}${esc(me.full_name)}</span><a href="#" id="out">${ico("logout")}خروج</a></nav>${moeHTML}</div>
+     <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}>${ico(e)}${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
   document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
   sb.rpc("school_stats").then(({ data }) => { if (data) document.querySelectorAll("[data-b]").forEach((e) => { const v = data[e.dataset.b]; if (v !== undefined) e.textContent = v; }); });
   const main = document.getElementById("main");
