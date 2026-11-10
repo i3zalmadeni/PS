@@ -51,8 +51,8 @@ async function boot(page, render, o = {}) {
   if (o.admin && !isAdmin) { location.replace("dashboard.html"); return; }
   const ctx = { me, isAdmin, uid: session.user.id };
   document.getElementById("shell").innerHTML =
-    `<header><div class="wrap top"><div class="brand"><b>النواة الرقمية</b><small>متوسطة لبيد بن ربيعة</small></div>
-     <nav>${NAV.filter((n) => !n[2] || isAdmin).map(([h, n]) => `<a href="${h}" class="${h === page ? "on" : ""}">${n}</a>`).join("")}<a href="#" id="out">خروج</a></nav></div></header><main class="wrap" id="main"></main>`;
+    `<header><div class="wrap top">${brandHTML("dashboard.html")}${moeHTML}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">☰</button>
+     <nav>${NAV.filter((n) => !n[2] || isAdmin).map(([h, n]) => `<a href="${h}" class="${h === page ? "on" : ""}">${n}</a>`).join("")}<a href="#" id="out">خروج</a></nav></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
   document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
   const main = document.getElementById("main");
   try { await render(main, ctx); } catch (e) { console.error(e); main.innerHTML = '<p class="err">تعذر تحميل الصفحة.</p>'; }
