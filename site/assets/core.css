@@ -477,3 +477,15 @@ header nav a{position:relative}header nav a::after{content:"";position:absolute;
 .fd td{background:#f7fbfb;padding:0!important}.fdi{display:flex;gap:26px;flex-wrap:wrap;padding:14px 22px;animation:rowin .4s both}.fdi span{display:flex;align-items:center;gap:8px}.fdi small{color:var(--muted)}.fdi .ico{width:17px;height:17px;color:var(--brand)}
 @media (max-width:900px){.dr-split{grid-template-columns:1fr}.dr-row{grid-template-columns:100px 1fr 44px 46px;padding:12px}}
 .dr-insp .kv dt,.dr-insp .kv dd{opacity:1!important;animation:none!important}
+/* ===== منسوبو المدرسة التفاعلية ===== */
+.pp-lead{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.pp-l{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid var(--line);border-inline-start:5px solid var(--gold);border-radius:18px;padding:14px 18px;box-shadow:var(--shadow)}
+.av{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,var(--brand),var(--brand2));color:#fff;font-weight:800;font-style:normal;flex:none}
+.pp-l small{display:block;color:var(--ink2)}
+.sp .dr-b i{background:linear-gradient(270deg,#7a4bb5,#2f6fc4)}
+.rtool .vt{margin:0;display:flex;gap:6px}.rtool .vt button{padding:7px 14px;border-radius:12px}.rtool .vt .ico{width:16px;height:16px}
+.pp-g{border-bottom:1px solid var(--line)}.pp-g summary{display:flex;align-items:center;justify-content:space-between;padding:14px 22px;cursor:pointer;font-weight:700;list-style:none}.pp-g summary::-webkit-details-marker{display:none}
+.pp-g summary::after{content:"+";font-size:1.3rem;color:var(--brand);margin-inline-start:12px;transition:transform .3s}.pp-g[open] summary::after{transform:rotate(45deg)}
+.pp-g summary b{flex:1}
+.pp-gl{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;padding:4px 22px 18px;animation:rowin .45s both}
+.pp-p{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:#f7fbfb;border:1px solid var(--line)}.pp-p .av{width:36px;height:36px;font-size:.95rem}.pp-p small{display:block;color:var(--ink2);font-size:.8rem}
