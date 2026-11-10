@@ -23,31 +23,48 @@ function fillLive(o) {
   pubReveal();
 }
 
+function sortable(tbl) {
+  const ths = tbl.querySelectorAll("th.srt"), tb = tbl.tBodies[0];
+  ths.forEach((th) => (th.onclick = () => { const c = th.cellIndex, asc = !th.classList.contains("asc"); ths.forEach((x) => x.classList.remove("asc", "desc")); th.classList.add(asc ? "asc" : "desc");
+    const val = (r) => { const t = r.cells[c]; return t.dataset.v ?? t.textContent.trim(); };
+    [...tb.rows].sort((a, b) => { const x = val(a), y = val(b), nx = parseFloat(x), ny = parseFloat(y); const d = !isNaN(nx) && !isNaN(ny) ? nx - ny : String(x).localeCompare(String(y), "ar"); return asc ? d : -d; }).forEach((r) => tb.appendChild(r));
+    [...tb.rows].forEach((r, n) => { const f = r.querySelector(".idx"); if (f) f.textContent = n + 1; }); }));
+}
+function tocBind(root) {
+  const links = [...root.querySelectorAll(".toc a")], secs = links.map((a) => document.getElementById(a.getAttribute("href").slice(1)));
+  const on = () => { let cur = 0; secs.forEach((s, n) => { if (s && s.getBoundingClientRect().top < 140) cur = n; }); links.forEach((a, n) => a.classList.toggle("on", n === cur)); };
+  addEventListener("scroll", on, { passive: true }); on();
+}
+const toc = (l) => `<nav class="toc"><b>فهرس المستودع</b>${l.map(([id, i, t]) => `<a href="#${id}">${ico(i)}${t}</a>`).join("")}</nav>`;
+const rsec = (id, i, t, small, body) => `<section class="rsec" id="${id}"><div class="rh">${ico(i)}<h2>${t}</h2><small>${small || ""}</small></div><div class="rb">${body}</div></section>`;
+const kv = (rows) => `<dl class="kv">${rows.map(([i, k, v]) => `<dt>${ico(i)}${k}</dt><dd dir="auto">${v}</dd>`).join("")}</dl>`;
+const csvDown = (name, head, rows) => { const q = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`; const b = new Blob(["\ufeff" + [head, ...rows].map((r) => r.map(q).join(",")).join("\n")], { type: "text/csv;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; a.click(); };
+
 async function renderData() {
   const root = document.getElementById("data-root"); const o = await loadOverview();
-  if (!o || !o.published) { root.innerHTML = `<div class="tgrid"><div class="tcard t6"><h3>البيانات العامة غير منشورة حالياً</h3><p>تُظهر هذه الصفحة ملخصاً إحصائياً حين تفعّله إدارة المدرسة.</p></div></div>`; return; }
-  const s = o.school || {}, loc = [s.region, s.city, s.district].filter(Boolean).join("، ");
-  const FT = ["ok", "warn", "bad"], tone = { operational: 4, limited: 3, closed: 5 };
-  const types = [...new Map((o.facilities || []).map((f) => [f.type, f.type_name || f.type])).entries()];
-  const info = [["pin", "الموقع", loc], ["phone", "الهاتف", s.phone], ["mail", "البريد", s.email], ["globe", "الموقع الإلكتروني", s.website]].filter((x) => x[2]);
-  const mx = (o.grades || []).length;
-  root.innerHTML = `<div class="sechd rv"><span class="tg">${ico("school")}</span><h2>${pesc(s.name)}</h2><small>${[s.stage, s.type, GEN[s.gender]].filter(Boolean).map(pesc).join(" · ")}</small></div>
-    <div class="tgrid">${info.map(([i, k, v], n) => `<div class="tcard t${n} rv"><div class="th"><div class="ti">${ico(i)}</div></div><p class="tm">${k}</p><h3 dir="auto">${pesc(v)}</h3></div>`).join("") || '<div class="tcard t6"><p>لم تُنشر بيانات التواصل.</p></div>'}</div>
-    <div class="sechd rv"><span class="tg">${ico("cap")}</span><h2>المتعلمون حسب المرحلة</h2></div><div class="tgrid" id="live-grades"></div>
-    <div class="sechd rv"><span class="tg">${ico("users")}</span><h2>المنسوبون حسب الفئة</h2></div><div class="tgrid">${Object.entries(o.personnel || {}).map(([k, v], n) => { const tot = o.totals?.personnel || 1, p = Math.round((v / tot) * 100); return `<div class="tcard t${[1, 3, 2][n % 3]} rv"><div class="th"><div class="ti">${ico("users")}</div><span class="tn">${v}</span></div><h3>${PUBX[k] || pesc(k)}</h3><p class="tm">${p}% من إجمالي المنسوبين</p><div class="tbar"><i style="width:${p}%"></i></div></div>`; }).join("")}</div>
-    <div class="sechd rv"><span class="tg">${ico("building")}</span><h2>المرافق</h2><small id="fcount"></small></div>
-    <div class="tb"><div class="srch"><input id="fq" placeholder="ابحث باسم المرفق أو المبنى">${ico("compass")}</div><div class="chips" id="fchips"></div><div class="vt"><button class="on" data-v="g">${ico("grid")}بطاقات</button><button data-v="l">${ico("menu")}قائمة</button></div></div>
-    <div class="tgrid" id="fgrid"></div><p class="glass-note">آخر تحديث للبيانات: ${pdate(o.generated_at)}. تعرض الصفحة معلومات عامة وإحصائية فقط، ولا تتضمن أي بيانات شخصية للمنسوبين أو المتعلمين.</p>`;
-  fillLive(o);
-  let ty = "", view = "g"; const F = o.facilities || [];
-  const chipsDraw = () => { document.getElementById("fchips").innerHTML = `<button class="fchip ${ty ? "" : "on"}" data-t=""><i></i>الكل <small>${F.length}</small></button>` + types.map(([k, n]) => `<button class="fchip ${ty === k ? "on" : ""}" data-t="${pesc(k)}"><i class="${["g", "b", "p", "y", "r"][types.findIndex((z) => z[0] === k) % 5]}"></i>${pesc(n)} <small>${F.filter((f) => f.type === k).length}</small></button>`).join(""); document.querySelectorAll("#fchips .fchip").forEach((b) => (b.onclick = () => { ty = b.dataset.t; chipsDraw(); draw(); })); };
-  const draw = () => { const q = document.getElementById("fq").value.trim(); const r = F.filter((f) => (!q || f.name.includes(q) || (f.building || "").includes(q)) && (!ty || f.type === ty));
-    document.getElementById("fcount").textContent = `${r.length} من ${F.length}`;
-    const gr = document.getElementById("fgrid"); gr.className = view === "g" ? "tgrid" : "lst";
-    gr.innerHTML = r.map((f) => { const st = FSTAT[f.status] || ["", ""]; return `<div class="tcard t${tone[f.status] ?? 0} rv in"><div class="th"><div class="ti">${ico("building")}</div><span class="badge ${st[1]}">${st[0]}</span></div><h3>${pesc(f.name)}</h3><p class="tm">${pesc(f.type_name || "")}${f.building ? " · " + pesc(f.building) : ""}${f.floor ? " · دور " + pesc(f.floor) : ""}${f.capacity ? " · سعة " + f.capacity : ""}</p></div>`; }).join("") || '<p class="sub">لا توجد مرافق مطابقة.</p>'; };
-  document.getElementById("fq").oninput = draw; chipsDraw(); draw();
-  root.querySelectorAll(".vt button").forEach((b) => (b.onclick = () => { view = b.dataset.v; root.querySelectorAll(".vt button").forEach((x) => x.classList.toggle("on", x === b)); draw(); }));
-  pubReveal();
+  if (!o || !o.published) { root.innerHTML = `<div class="repo"><div class="rsec" style="grid-column:1/-1"><div class="pn"><b>البيانات العامة غير منشورة حالياً</b><p>تُظهر هذه الصفحة سجل المدرسة حين تفعّله الإدارة.</p></div></div></div>`; return; }
+  const s = o.school || {}, t = o.totals || {}, F = o.facilities || [], loc = [s.region, s.city, s.district].filter(Boolean).join("، ");
+  const g = o.grades || [], tone = { operational: "c4", limited: "c3", closed: "c5" };
+  const info = kv([["school", "اسم المدرسة", pesc(s.name)], ["info", "المرحلة", pesc(s.stage || "—")], ["info", "النوع", pesc(s.type || "—")], ["users", "الفئة", pesc(GEN[s.gender] || "—")], ["hourglass", "العام الدراسي الحالي", pesc(o.year?.name || "—")], ["pin", "الموقع", pesc(loc || "—")], ["phone", "الهاتف", pesc(s.phone || "—")], ["mail", "البريد الإلكتروني", pesc(s.email || "—")], ["globe", "الموقع الإلكتروني", pesc(s.website || "—")]]);
+  const gt = g.reduce((a, x) => ({ c: a.c + x.classes, s: a.s + x.students, k: a.k + (x.capacity || 0) }), { c: 0, s: 0, k: 0 });
+  const gTbl = `<div class="twrap"><table class="dt"><thead><tr><th>المرحلة الدراسية</th><th>الفصول</th><th>المتعلمون</th><th>السعة</th><th>الإشغال</th></tr></thead><tbody>${g.map((x) => { const p = x.capacity ? Math.min(100, Math.round((x.students / x.capacity) * 100)) : 0; return `<tr><td><b>${pesc(x.name)}</b></td><td class="n">${x.classes}</td><td class="n">${x.students}</td><td class="n">${x.capacity || "—"}</td><td><div class="occ"><i><b style="width:${p}%"></b></i><span class="n">${p}%</span></div></td></tr>`; }).join("")}</tbody><tfoot><tr><td>الإجمالي</td><td>${gt.c}</td><td>${gt.s}</td><td>${gt.k || "—"}</td><td>${gt.k ? Math.round((gt.s / gt.k) * 100) + "%" : "—"}</td></tr></tfoot></table></div>`;
+  const tp = t.personnel || 1;
+  const pTbl = `<div class="twrap"><table class="dt"><thead><tr><th>الفئة</th><th>العدد</th><th>النسبة من الإجمالي</th></tr></thead><tbody>${Object.entries(o.personnel || {}).map(([k, v]) => `<tr><td><b>${PUBX[k] || pesc(k)}</b></td><td class="n">${v}</td><td><div class="occ"><i><b style="width:${Math.round((v / tp) * 100)}%"></b></i><span class="n">${Math.round((v / tp) * 100)}%</span></div></td></tr>`).join("")}</tbody><tfoot><tr><td>الإجمالي</td><td>${t.personnel ?? 0}</td><td>100%</td></tr></tfoot></table></div>`;
+  const types = [...new Map(F.map((f) => [f.type, f.type_name || f.type])).entries()];
+  root.innerHTML = `<div class="repo">${toc([["r1", "school", "ملف المدرسة"], ["r2", "cap", "المراحل والفصول"], ["r3", "users", "المنسوبون"], ["r4", "building", "المرافق"]])}<div>
+    ${rsec("r1", "school", "ملف المدرسة", "سجل المدرسة", info)}
+    ${rsec("r2", "cap", "المراحل والفصول", `${gt.s} متعلماً`, gTbl)}
+    ${rsec("r3", "users", "المنسوبون حسب الفئة", `${t.personnel ?? 0} منسوباً`, pTbl)}
+    ${rsec("r4", "building", "سجل المرافق", `<span id="fcount"></span>`, `<div class="rtool"><input id="fq" placeholder="ابحث باسم المرفق أو المبنى"><select id="ft"><option value="">كل الأنواع</option>${types.map(([k, n]) => `<option value="${pesc(k)}">${pesc(n)}</option>`).join("")}</select><button class="btn sm sec" id="fx">تصدير CSV</button></div><div class="twrap"><table class="dt" id="ftbl"><thead><tr><th>#</th><th class="srt">المرفق</th><th class="srt">النوع</th><th class="srt">المبنى</th><th class="srt">الدور</th><th class="srt">السعة</th><th class="srt">الحالة</th></tr></thead><tbody></tbody></table></div>`)}
+    <p class="glass-note" style="padding:0">آخر تحديث للبيانات: ${pdate(o.generated_at)}. تعرض الصفحة معلومات عامة وإحصائية فقط، ولا تتضمن أي بيانات شخصية للمنسوبين أو المتعلمين.</p></div></div>`;
+  let cur = [];
+  const draw = () => { const q = document.getElementById("fq").value.trim(), ty = document.getElementById("ft").value;
+    cur = F.filter((f) => (!q || f.name.includes(q) || (f.building || "").includes(q)) && (!ty || f.type === ty));
+    document.getElementById("fcount").textContent = `${cur.length} من ${F.length}`;
+    document.querySelector("#ftbl tbody").innerHTML = cur.map((f, n) => { const st = FSTAT[f.status] || ["", ""]; return `<tr><td class="idx">${n + 1}</td><td><b>${pesc(f.name)}</b></td><td>${pesc(f.type_name || "")}</td><td>${pesc(f.building || "—")}</td><td>${pesc(f.floor ?? "—")}</td><td class="n">${f.capacity || "—"}</td><td><span class="pill ${tone[f.status] || ""}">${st[0]}</span></td></tr>`; }).join("") || '<tr><td colspan="7">لا توجد مرافق مطابقة.</td></tr>'; };
+  document.getElementById("fq").oninput = draw; document.getElementById("ft").oninput = draw; draw(); sortable(document.getElementById("ftbl"));
+  document.getElementById("fx").onclick = () => csvDown("المرافق.csv", ["المرفق", "النوع", "المبنى", "الدور", "السعة", "الحالة"], cur.map((f) => [f.name, f.type_name, f.building, f.floor, f.capacity, (FSTAT[f.status] || [""])[0]]));
+  tocBind(root);
 }
 function pubReveal() { const els = document.querySelectorAll(".rv:not(.in)"); if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("in")); return; } const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.1 }); els.forEach((e) => io.observe(e)); }
 
@@ -55,19 +72,20 @@ let _pp;
 function loadStaff() { return (_pp ||= fetch(APP_CONFIG.supabaseUrl + "/rest/v1/rpc/public_staff", { method: "POST", headers: { apikey: APP_CONFIG.supabaseKey, "content-type": "application/json" }, body: "{}" }).then((r) => (r.ok ? r.json() : null)).catch(() => null)); }
 async function renderPeople() {
   const root = document.getElementById("people-root"), o = await loadStaff();
-  if (!o || !o.published) { root.innerHTML = `<div class="tgrid"><div class="tcard t6"><h3>قائمة المنسوبين غير منشورة حالياً</h3><p>تظهر هذه الصفحة حين تفعّل إدارة المدرسة النشر العام.</p></div></div>`; return; }
-  const L = o.staff || [], cnt = (c) => L.filter((x) => x.category === c).length, TC = { teaching: 1, administrative: 3, support: 4 };
-  root.innerHTML = `<div class="sechd rv"><span class="tg">${ico("users")}</span><h2>دليل المنسوبين</h2><small id="pcount"></small></div>
-    <div class="tb"><div class="srch"><input id="pq" placeholder="ابحث بالاسم أو التخصص">${ico("compass")}</div><div class="chips" id="pchips"></div><div class="vt"><button class="on" data-v="g">${ico("grid")}بطاقات</button><button data-v="l">${ico("menu")}قائمة</button></div></div>
-    <div class="tgrid" id="pgrid"></div><p class="glass-note">تُنشر الأسماء والوظائف والتخصصات لمن وافقت الإدارة على إظهاره فقط، دون أي بيانات تواصل أو بيانات شخصية. آخر تحديث: ${pdate(o.generated_at)}.</p>`;
-  let c = "", view = "g";
-  const dot = { "": "", teaching: "b", administrative: "y", support: "g" };
-  const chipsDraw = () => { document.getElementById("pchips").innerHTML = [["", "الكل", L.length], ...Object.entries(PUBX).map(([k, n]) => [k, n, cnt(k)])].map(([k, n, v]) => `<button class="fchip ${c === k ? "on" : ""}" data-t="${k}"><i class="${dot[k]}"></i>${n} <small>${v}</small></button>`).join(""); document.querySelectorAll("#pchips .fchip").forEach((b) => (b.onclick = () => { c = b.dataset.t; chipsDraw(); draw(); })); };
-  const draw = () => { const q = document.getElementById("pq").value.trim(); const r = L.filter((x) => (!q || x.name.includes(q) || (x.specialty || "").includes(q)) && (!c || x.category === c));
-    const gr = document.getElementById("pgrid"); gr.className = view === "g" ? "tgrid" : "lst";
-    gr.innerHTML = r.map((x) => `<div class="tcard t${TC[x.category] ?? 0} rv in"><div class="th"><div class="ti">${ico(x.category === "teaching" ? "cap" : x.category === "administrative" ? "school" : "users")}</div>${x.leader ? '<span class="badge ok">قيادة</span>' : ""}</div><h3>${pesc(x.name)}</h3><p class="tm">${pesc(x.job_title || PUBX[x.category] || "")}${x.specialty ? " · " + pesc(x.specialty) : ""}</p></div>`).join("") || '<p class="sub">لا توجد نتائج مطابقة.</p>';
-    document.getElementById("pcount").textContent = `${r.length} من ${L.length} منسوب`; };
-  document.getElementById("pq").oninput = draw; chipsDraw(); draw();
-  root.querySelectorAll(".vt button").forEach((b) => (b.onclick = () => { view = b.dataset.v; root.querySelectorAll(".vt button").forEach((x) => x.classList.toggle("on", x === b)); draw(); }));
-  pubReveal();
+  if (!o || !o.published) { root.innerHTML = `<div class="repo"><div class="rsec" style="grid-column:1/-1"><div class="pn"><b>قائمة المنسوبين غير منشورة حالياً</b><p>تظهر هذه الصفحة حين تفعّل إدارة المدرسة النشر العام.</p></div></div></div>`; return; }
+  const L = o.staff || [], PC = { teaching: "", administrative: "c3", support: "c4" };
+  const spec = [...new Set(L.map((x) => x.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
+  const cnt = (c) => L.filter((x) => x.category === c).length;
+  root.innerHTML = `<div class="repo">${toc([["r1", "info", "ملخص السجل"], ["r2", "users", "دليل المنسوبين"]])}<div>
+    ${rsec("r1", "info", "ملخص السجل", "المنشور فقط", `<div class="twrap"><table class="dt"><thead><tr><th>الفئة</th><th>العدد</th><th>النسبة</th></tr></thead><tbody>${Object.entries(PUBX).map(([k, n]) => `<tr><td><b>${n}</b></td><td class="n">${cnt(k)}</td><td><div class="occ"><i><b style="width:${L.length ? Math.round((cnt(k) / L.length) * 100) : 0}%"></b></i><span class="n">${L.length ? Math.round((cnt(k) / L.length) * 100) : 0}%</span></div></td></tr>`).join("")}</tbody><tfoot><tr><td>الإجمالي</td><td>${L.length}</td><td>100%</td></tr></tfoot></table></div>`)}
+    ${rsec("r2", "users", "دليل المنسوبين", `<span id="pcount"></span>`, `<div class="rtool"><input id="pq" placeholder="ابحث بالاسم أو الوظيفة أو التخصص"><select id="pc"><option value="">كل الفئات</option>${Object.entries(PUBX).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select><select id="ps"><option value="">كل التخصصات</option>${spec.map((x) => `<option>${pesc(x)}</option>`).join("")}</select><button class="btn sm sec" id="px">تصدير CSV</button></div><div class="twrap"><table class="dt" id="ptbl"><thead><tr><th>#</th><th class="srt">الاسم</th><th class="srt">الوظيفة</th><th class="srt">التخصص</th><th class="srt">الفئة</th></tr></thead><tbody></tbody></table></div>`)}
+    <p class="glass-note" style="padding:0">تُنشر الأسماء والوظائف والتخصصات لمن وافقت الإدارة على إظهاره فقط، دون أي بيانات تواصل أو شخصية. آخر تحديث: ${pdate(o.generated_at)}.</p></div></div>`;
+  let cur = [];
+  const draw = () => { const q = document.getElementById("pq").value.trim(), c = document.getElementById("pc").value, s = document.getElementById("ps").value;
+    cur = L.filter((x) => (!q || x.name.includes(q) || (x.specialty || "").includes(q) || (x.job_title || "").includes(q)) && (!c || x.category === c) && (!s || x.specialty === s));
+    document.querySelector("#ptbl tbody").innerHTML = cur.map((x, n) => `<tr><td class="idx">${n + 1}</td><td><b>${pesc(x.name)}</b>${x.leader ? ' <span class="pill c1">قيادة</span>' : ""}</td><td>${pesc(x.job_title || "—")}</td><td>${pesc(x.specialty || "—")}</td><td><span class="pill ${PC[x.category] || ""}">${PUBX[x.category] || ""}</span></td></tr>`).join("") || '<tr><td colspan="5">لا توجد نتائج مطابقة.</td></tr>';
+    document.getElementById("pcount").textContent = `${cur.length} من ${L.length} منسوب`; };
+  ["pq", "pc", "ps"].forEach((i) => (document.getElementById(i).oninput = draw)); draw(); sortable(document.getElementById("ptbl"));
+  document.getElementById("px").onclick = () => csvDown("المنسوبون.csv", ["الاسم", "الوظيفة", "التخصص", "الفئة"], cur.map((x) => [x.name, x.job_title, x.specialty, PUBX[x.category]]));
+  tocBind(root);
 }
