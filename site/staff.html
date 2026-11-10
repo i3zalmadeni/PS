@@ -1,14 +1,4 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>المنسوبون – النواة الرقمية</title><link rel="stylesheet" href="assets/core.css"></head><body><div id="shell"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js"></script><script src="assets/core.js"></script>
-<script>boot("staff.html", async (m) => {
-
-const { data: rows } = await sb.from("staff_members").select("full_name,specialty,account_status,is_active,job_titles(name_ar),staff_categories(name_ar)").order("full_name");
-m.innerHTML = head("المنسوبون", "قاعدة بيانات منسوبي المدرسة") + `<input id="q" placeholder="بحث بالاسم" style="margin-bottom:12px">
- <table><thead><tr><th>الاسم</th><th>الفئة</th><th>المسمى</th><th>التخصص</th><th>الحساب</th></tr></thead><tbody id="tb"></tbody></table>`;
-const L = { none: "بلا حساب", invited: "مدعو", active: "نشط", suspended: "موقوف" };
-const draw = (q) => { document.getElementById("tb").innerHTML = (rows || []).filter((r) => r.full_name.includes(q)).map((r) =>
-  `<tr><td>${esc(r.full_name)}</td><td>${esc(r.staff_categories?.name_ar)}</td><td>${esc(r.job_titles?.name_ar)}</td><td>${esc(r.specialty || "—")}</td><td>${L[r.account_status]}</td></tr>`).join(""); };
-draw(""); document.getElementById("q").oninput = (e) => draw(e.target.value.trim());
-});</script></body></html>
+<script src="assets/config.js"></script><script src="assets/core.js"></script><script src="assets/p-staff.js"></script></body></html>

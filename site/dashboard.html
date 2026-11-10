@@ -1,16 +1,4 @@
 <!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>لوحة النواة – النواة الرقمية</title><link rel="stylesheet" href="assets/core.css"></head><body><div id="shell"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="assets/config.js"></script><script src="assets/core.js"></script>
-<script>boot("dashboard.html", async (m) => {
-
-const [{ data: s }, { data: cats }, { data: t }, { data: tm }] = await Promise.all([
-  sb.from("staff_members").select("category").eq("is_active", true), sb.from("staff_categories").select("code,name_ar").order("sort_order"),
-  sb.from("teams").select("id").eq("status", "active"), sb.from("team_memberships").select("id").is("ended_on", null)]);
-const by = (c) => (s || []).filter((x) => x.category === c).length;
-m.innerHTML = head("لوحة النواة الرقمية", "نظرة عامة على المنسوبين والفرق") + `<div class="grid">
- <div class="card stat"><b>${(s || []).length}</b><span>إجمالي المنسوبين</span></div>
- ${(cats || []).map((c) => `<div class="card stat"><b>${by(c.code)}</b><span>${esc(c.name_ar)}</span></div>`).join("")}
- <div class="card stat"><b>${(t || []).length}</b><span>فرق ولجان نشطة</span></div>
- <div class="card stat"><b>${(tm || []).length}</b><span>عضويات نشطة</span></div></div>`;
-});</script></body></html>
+<script src="assets/config.js"></script><script src="assets/core.js"></script><script src="assets/p-dashboard.js"></script></body></html>
