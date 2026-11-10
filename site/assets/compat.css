@@ -21,3 +21,18 @@ body.pg .btn.red{background:var(--bad);color:#fff}
 body.pg .btn[disabled]{opacity:.5;cursor:not-allowed}
 body.pg table{border-collapse:collapse} body.pg td,body.pg th{padding:6px 8px;text-align:start}
 body.pg .login{max-width:420px;margin:6vh auto;padding:0 16px}
+
+/* الشريط الإضافي لوحة التحكم (نفس تصميم لوحة التقويم الذاتي الذكي) */
+.astick{position:sticky;top:0;z-index:100;isolation:isolate}.astick header{position:static}
+#subbar{background:linear-gradient(90deg,var(--navy2),var(--navy));box-shadow:0 8px 20px rgba(8,30,40,.18)}
+.sb{display:flex;align-items:center;gap:12px;padding-block:8px;max-width:1280px;margin:0 auto;padding-inline:16px}
+#menu{display:flex;align-items:center;gap:4px;flex:1;flex-wrap:wrap}
+#menu>a{position:relative;display:inline-flex;align-items:center;gap:7px;padding:10px 16px;border-radius:12px;color:#d3e8ec;text-decoration:none;font-weight:500;white-space:nowrap}
+#menu>a:hover{background:rgba(255,255,255,.09);color:#fff}
+#menu>a.on{background:var(--navy3);color:#fff;font-weight:700}
+#menu>a.on::after{content:"";position:absolute;inset-inline:16px;bottom:3px;height:3px;border-radius:3px;background:var(--gold)}
+#menu>a .ico{width:18px;height:18px;opacity:.9}#menu>a.on .ico{color:var(--gold);opacity:1}
+#menu .nb{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:99px;background:var(--gold);color:#3a2a05;font-size:.74rem;font-weight:800;margin-inline-start:4px}
+.sb .who{color:#d3e8ec;font-size:.88rem;white-space:nowrap;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.sb .sbout{background:rgba(255,255,255,.1);color:#fff;border:1px solid rgba(255,255,255,.28);padding:7px 14px;border-radius:10px;font:inherit;cursor:pointer}.sb .sbout:hover{background:rgba(255,255,255,.18)}
+@media(max-width:860px){.sb{flex-wrap:wrap}#menu{flex:1 1 100%;order:2}.sb .who{display:none}#menu>a{padding:9px 10px;font-size:.9rem}.astick{position:static}}

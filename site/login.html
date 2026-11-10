@@ -6,7 +6,7 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/theme.css"><link rel="stylesheet" href="assets/compat.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="assets/config.js"></script><script src="assets/app.js"></script><script src="assets/footer.js"></script>
-</head><body class="pub pg"><script>document.body.insertAdjacentHTML("afterbegin", siteHeader('<a href="index.html">الرئيسية</a><a href="login.html" class="navbtn">دخول</a>')); wireNavToggle();</script><div class="login"><div class="card"><h2 class="title">مجتمع المعلمين الذكي</h2>
+</head><body class="pub pg"><script>document.body.insertAdjacentHTML("afterbegin", siteHeader(PUBNAV.map(([h, n]) => `<a href="${h}">${n}</a>`).join("") + '<a href="login.html" class="navbtn">دخول المعلمين</a>')); wireNavToggle();</script><div class="login"><div class="card"><h2 class="title">مجتمع المعلمين الذكي</h2>
 <p class="sub">متوسطة لبيد بن ربيعة – الدخول بدعوة من المنسق</p>
 <form id="f"><label for="e">البريد الإلكتروني</label><input id="e" type="email" required autocomplete="username" dir="ltr">
 <label for="p">كلمة المرور</label><input id="p" type="password" required autocomplete="current-password" dir="ltr">
