@@ -17,7 +17,7 @@ function bindNav() { const b = document.querySelector(".navtoggle"), n = documen
 const PUB_NAV = [["index.html", "الرئيسية"], ["data.html", "بيانات المدرسة"], ["people.html", "منسوبو المدرسة"], ["about.html", "عن النواة"]];
 const headMoe = '<span class="moe hm"><b>وزارة التعليم</b><small>Ministry of Education</small></span>';
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${n}</a>`).join("")}</nav><a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a>${headMoe}</div></header>`;
+<nav>${PUB_NAV.map(([h, n]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""}>${n}</a>`).join("")}</nav>${headMoe}<a class="loginbtn ${active === "login.html" ? "on" : ""}" href="login.html" data-login="1">تسجيل الدخول</a></div></header>`;
 // شريط داكن لأقسام الصفحة الحالية (يُبنى من العناوين) مع تمييز القسم الظاهر أثناء التمرير
 function pubSubnav() {
   const bar = document.getElementById("pubsub"); if (!bar) return;

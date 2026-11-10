@@ -260,3 +260,19 @@ header #out{color:var(--bad)}header .loginbtn#out:hover{background:var(--bad);co
 @media (max-width:980px){header nav{gap:16px}.loginbtn{padding:8px 14px}}
 @media (max-width:860px){header .top{flex-wrap:wrap;gap:10px}header nav{flex-basis:100%;order:9;flex-direction:column;align-items:stretch;gap:2px}header nav a{padding:10px 6px}header nav a.on::after{inset-inline:auto;width:36px}.navtoggle{order:2}.loginbtn{margin-inline-start:auto}}
 @media (max-width:560px){header .moe.hm{display:none}}
+
+/* ===== مطابقة ترويسة «الخطط الذكية»: العلامة يميناً، قائمة موزّعة، الوزارة ثم زر الدخول أقصى اليسار ===== */
+header{background:linear-gradient(to left,#fbf4e8 0%,#fdfaf3 22%,#fff 55%,#eef7f9 100%)}
+header .top{min-height:66px;gap:26px}
+.bm{gap:12px}.bm svg,.bm .bm-ic{width:46px!important;height:46px!important}
+.bm b{font-size:1.3rem;line-height:1.25}.bm small{font-size:.84rem;color:#b08838}
+header nav{flex:1;justify-content:space-evenly;gap:12px;margin-inline:18px}
+header nav a{font-size:1.02rem;padding:10px 2px}
+header nav a.on::after{bottom:2px;height:3px;width:100%;inset-inline:0}
+header .moe.hm{border-inline-start:2px solid #e3a93c;padding-inline-start:16px;margin-inline-start:4px}
+header .moe.hm b{font-size:1.02rem}header .moe.hm small{font-size:.72rem;color:#7b8ea0}
+.loginbtn{background:#e3f1f4;color:#2c6f7e;border:0;border-radius:18px;padding:15px 30px;font-size:.98rem;font-weight:600}
+header::after{height:4px;background:linear-gradient(90deg,#b9b89a,#e6b04a calc(40% + var(--sp)*20%),#2a8c96 calc(40% + var(--sp)*20%),#2f8f99)}
+@media (max-width:1100px){header nav{margin-inline:6px}.bm b{font-size:1.15rem}}
+@media (max-width:860px){header nav{margin-inline:0}}
+.loginbtn{padding:12px 28px}
