@@ -221,3 +221,19 @@ nav .ico,.dnav .ico{width:18px;height:18px;margin-inline-end:8px;flex:none;trans
 .person.lead .av{background:linear-gradient(135deg,#f6c25e,#eaa83a);color:#3b2a06}
 .person b{display:block;line-height:1.35}.person .role{color:var(--brand2);font-size:.86rem;font-weight:700}
 .person .meta2{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.person .meta2 span{background:var(--soft);color:var(--ink2);border-radius:99px;padding:1px 10px;font-size:.76rem}
+
+/* ===== ترويسة موحّدة: نفس النمط في الموقع العام ولوحة التحكم ===== */
+header .top{min-height:70px;padding-block:8px}
+header nav{gap:6px}
+header nav a{border-radius:14px;padding:8px 14px;font-weight:600;color:var(--ink2);transition:background .2s,color .2s}
+header nav a:hover{background:var(--brandsoft);color:var(--brand2)}
+header nav a.on{background:var(--brandsoft);color:var(--brand2);font-weight:800;box-shadow:inset 0 -3px 0 var(--gold)}
+header nav a[data-login]:not(.on){background:var(--grad);color:#fff;box-shadow:0 6px 16px rgba(12,111,130,.25)}
+header nav a[data-login]:not(.on):hover{transform:translateY(-2px);box-shadow:var(--shadow2)}
+header nav a[data-login]:not(.on) .ico{stroke:#fff}
+header #out{color:var(--bad)}header #out:hover{background:var(--c5b)}
+.dnav[hidden]{display:none}
+.dnav{scroll-margin-top:0}
+html{scroll-behavior:smooth;scroll-padding-top:130px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.dnav a.on{box-shadow:none}

@@ -24,18 +24,18 @@ async function renderData() {
   const s = o.school || {}, t = o.totals || {}, loc = [s.region, s.city, s.district].filter(Boolean).join("، ");
   const kp = (e, v, n, k) => `<div class="kpi k${k}"><div class="ic">${ico(e)}</div><div><b data-live="${v}">0</b><span>${n}</span></div></div>`;
   const types = [...new Map((o.facilities || []).map((f) => [f.type, f.type_name || f.type])).entries()];
-  root.innerHTML = `<div class="card pubcard rv"><div class="row2"><div><h2>${pesc(s.name)}</h2><p class="sub">${[s.stage, s.type, GEN[s.gender]].filter(Boolean).map(pesc).join(" · ")}</p></div>${o.year ? `<span class="yr2"><i></i>العام الدراسي ${pesc(o.year.name)}</span>` : ""}</div>
+  root.innerHTML = `<div class="card pubcard rv" data-sec="بيانات المدرسة" data-sec-ico="school"><div class="row2"><div><h2>${pesc(s.name)}</h2><p class="sub">${[s.stage, s.type, GEN[s.gender]].filter(Boolean).map(pesc).join(" · ")}</p></div>${o.year ? `<span class="yr2"><i></i>العام الدراسي ${pesc(o.year.name)}</span>` : ""}</div>
       <div class="fg mt">${[["pin", "الموقع", loc], ["phone", "الهاتف", s.phone], ["mail", "البريد", s.email], ["globe", "الموقع الإلكتروني", s.website]].filter((x) => x[2]).map(([i, k, v]) => `<div><small class="sub ilab">${ico(i)}${k}</small><br><b dir="auto">${pesc(v)}</b></div>`).join("") || '<p class="sub">لم تُنشر بيانات التواصل.</p>'}</div></div>
-    <div class="kstrip2 mt">${kp("users", "personnel", "منسوبو المدرسة", 0)}${kp("cap", "students", "المتعلمون", 1)}${kp("grid", "classes", "الفصول الدراسية", 2)}${kp("building", "facilities", "المرافق", 3)}</div>
-    <div class="grid mt2"><div class="card brk rv"><b class="ilab">${ico("cap")}المتعلمون والفصول حسب المرحلة</b>${bars((o.grades || []).map((x) => [`${x.name} · ${x.classes} فصول`, x.students]))}</div>
+    <div class="kstrip2 mt" data-sec="الأرقام" data-sec-ico="chart">${kp("users", "personnel", "منسوبو المدرسة", 0)}${kp("cap", "students", "المتعلمون", 1)}${kp("grid", "classes", "الفصول الدراسية", 2)}${kp("building", "facilities", "المرافق", 3)}</div>
+    <div class="grid mt2" data-sec="التوزيع" data-sec-ico="cap"><div class="card brk rv"><b class="ilab">${ico("cap")}المتعلمون والفصول حسب المرحلة</b>${bars((o.grades || []).map((x) => [`${x.name} · ${x.classes} فصول`, x.students]))}</div>
       <div class="card brk rv"><b class="ilab">${ico("users")}المنسوبون حسب الفئة</b>${bars(Object.entries(o.personnel || {}).map(([k, v]) => [PUBX[k] || k, v]))}</div></div>
-    <h3 class="sec rv ilab">${ico("building")}المرافق</h3><div class="bar rv"><input id="fq" placeholder="ابحث باسم المرفق أو المبنى"><select id="ft"><option value="">كل الأنواع</option>${types.map(([k, n]) => `<option value="${pesc(k)}">${pesc(n)}</option>`).join("")}</select></div>
+    <h3 class="sec rv ilab" data-sec="المرافق" data-sec-ico="building">${ico("building")}المرافق</h3><div class="bar rv"><input id="fq" placeholder="ابحث باسم المرفق أو المبنى"><select id="ft"><option value="">كل الأنواع</option>${types.map(([k, n]) => `<option value="${pesc(k)}">${pesc(n)}</option>`).join("")}</select></div>
     <div class="grid" id="fgrid"></div><p class="sub mt">آخر تحديث للبيانات: ${pdate(o.generated_at)}. تعرض الصفحة معلومات عامة وإحصائية فقط، ولا تتضمن أي بيانات شخصية للمنسوبين أو المتعلمين.</p>`;
   const draw = () => { const q = document.getElementById("fq").value.trim(), ty = document.getElementById("ft").value;
     document.getElementById("fgrid").innerHTML = (o.facilities || []).filter((f) => (!q || f.name.includes(q) || (f.building || "").includes(q)) && (!ty || f.type === ty)).map((f) => { const st = FSTAT[f.status] || ["", ""]; return `<div class="card feat fac"><div class="row2"><b>${pesc(f.name)}</b><span class="badge ${st[1]}">${st[0]}</span></div><small class="sub">${pesc(f.type_name || "")}</small><div class="meta">${f.building ? `<span>${ico("building")}${pesc(f.building)}</span>` : ""}${f.floor ? `<span>${ico("up")}دور ${pesc(f.floor)}</span>` : ""}${f.capacity ? `<span>${ico("users")}${f.capacity}</span>` : ""}</div></div>`; }).join("") || '<p class="sub">لا توجد مرافق مطابقة.</p>'; };
   document.getElementById("fq").oninput = draw; document.getElementById("ft").oninput = draw; draw();
   root.querySelectorAll("[data-live]").forEach((e) => animateTo(e, t[e.dataset.live] ?? 0));
-  pubReveal();
+  pubReveal(); pubSubnav();
 }
 function pubReveal() { const els = document.querySelectorAll(".rv:not(.in)"); if (!("IntersectionObserver" in window)) { els.forEach((e) => e.classList.add("in")); return; } const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: 0.1 }); els.forEach((e) => io.observe(e)); }
 
@@ -46,8 +46,8 @@ async function renderPeople() {
   if (!o || !o.published) { root.innerHTML = `<div class="card empty"><div class="big">${ico("lock")}</div><h3>قائمة المنسوبين غير منشورة حالياً</h3><p class="sub">تظهر هذه الصفحة حين تفعّل إدارة المدرسة النشر العام.</p></div>`; return; }
   const L = o.staff || [], cnt = (c) => L.filter((x) => x.category === c).length;
   const spec = [...new Set(L.map((x) => x.specialty).filter(Boolean))].sort((a, b) => a.localeCompare(b, "ar"));
-  root.innerHTML = `<div class="kstrip2">${[["users", L.length, "إجمالي المنشورين", 0], ["cap", cnt("teaching"), "الهيئة التعليمية", 1], ["building", cnt("administrative"), "الهيئة الإدارية", 3], ["grid", cnt("support"), "الهيئة المساندة", 2]].map(([i, v, n, k]) => `<div class="kpi k${k}"><div class="ic">${ico(i)}</div><div><b data-n="${v}">0</b><span>${n}</span></div></div>`).join("")}</div>
-    <div class="bar mt2"><input id="pq" placeholder="ابحث بالاسم أو التخصص"><select id="pc"><option value="">كل الفئات</option>${Object.entries(PUBX).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select><select id="ps"><option value="">كل التخصصات</option>${spec.map((x) => `<option>${pesc(x)}</option>`).join("")}</select></div>
+  root.innerHTML = `<div class="kstrip2" data-sec="الأرقام" data-sec-ico="chart">${[["users", L.length, "إجمالي المنشورين", 0], ["cap", cnt("teaching"), "الهيئة التعليمية", 1], ["building", cnt("administrative"), "الهيئة الإدارية", 3], ["grid", cnt("support"), "الهيئة المساندة", 2]].map(([i, v, n, k]) => `<div class="kpi k${k}"><div class="ic">${ico(i)}</div><div><b data-n="${v}">0</b><span>${n}</span></div></div>`).join("")}</div>
+    <div class="bar mt2" data-sec="دليل المنسوبين" data-sec-ico="users"><input id="pq" placeholder="ابحث بالاسم أو التخصص"><select id="pc"><option value="">كل الفئات</option>${Object.entries(PUBX).map(([k, n]) => `<option value="${k}">${n}</option>`).join("")}</select><select id="ps"><option value="">كل التخصصات</option>${spec.map((x) => `<option>${pesc(x)}</option>`).join("")}</select></div>
     <div class="grid pgrid" id="pgrid"></div><p class="sub mt" id="pcount"></p><p class="sub">تُنشر الأسماء والوظائف والتخصصات لمن وافقت الإدارة على إظهاره فقط، دون أي بيانات تواصل أو بيانات شخصية. آخر تحديث: ${pdate(o.generated_at)}.</p>`;
   root.querySelectorAll("[data-n]").forEach((e) => animateTo(e, +e.dataset.n));
   const ini = (n) => (n.trim()[0] || "").toString();
@@ -55,5 +55,5 @@ async function renderPeople() {
     const r = L.filter((x) => (!q || x.name.includes(q) || (x.specialty || "").includes(q)) && (!c || x.category === c) && (!s || x.specialty === s));
     document.getElementById("pgrid").innerHTML = r.map((x) => `<div class="card person ${x.leader ? "lead" : ""}"><div class="av">${pesc(ini(x.name))}</div><div><b>${pesc(x.name)}</b><div class="role">${pesc(x.job_title || PUBX[x.category] || "")}</div><div class="meta2">${x.specialty ? `<span>${pesc(x.specialty)}</span>` : ""}<span>${pesc(PUBX[x.category] || "")}</span></div></div></div>`).join("") || '<p class="sub">لا توجد نتائج مطابقة.</p>';
     document.getElementById("pcount").textContent = `${r.length} من ${L.length} منسوب`; };
-  ["pq", "pc", "ps"].forEach((i) => (document.getElementById(i).oninput = draw)); draw();
+  ["pq", "pc", "ps"].forEach((i) => (document.getElementById(i).oninput = draw)); draw(); pubSubnav();
 }

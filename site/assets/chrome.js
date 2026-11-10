@@ -16,14 +16,27 @@ function bindNav() { const b = document.querySelector(".navtoggle"), n = documen
 // ===== الموقع العام: ترويسة (النواة يميناً، الصفحات وسطاً، شعار الوزارة يساراً) وديناميكية الصفحات =====
 const PUB_NAV = [["index.html", "الرئيسية", "home"], ["data.html", "بيانات المدرسة", "chart"], ["people.html", "منسوبو المدرسة", "users"], ["about.html", "عن النواة", "info"], ["login.html", "تسجيل الدخول", "key"]];
 const pubHeader = (active) => `<header><div class="wrap top">${brandHTML("index.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-<nav>${PUB_NAV.map(([h, n, e]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === "login.html" ? 'data-login="1"' : ""}>${ico(e)}${n}</a>`).join("")}</nav>${moeHTML}</div></header>`;
+<nav>${PUB_NAV.map(([h, n, e]) => `<a href="${h}" class="${h === active ? "on" : ""}" ${h === active ? 'aria-current="page"' : ""} ${h === "login.html" ? 'data-login="1"' : ""}>${ico(e)}${n}</a>`).join("")}</nav>${moeHTML}</div>
+<div class="dnav" id="pubsub" hidden><div class="wrap"><div class="dnav-in"></div></div></div></header>`;
+// شريط داكن لأقسام الصفحة الحالية (يُبنى من العناوين) مع تمييز القسم الظاهر أثناء التمرير
+function pubSubnav() {
+  const bar = document.getElementById("pubsub"); if (!bar) return;
+  const secs = [...document.querySelectorAll("[data-sec], section.pub > h2")].filter((e) => e.offsetParent !== null || e.dataset.sec);
+  const items = secs.map((e, i) => { if (!e.id) e.id = "sec" + i; return { id: e.id, t: e.dataset.sec || e.textContent.trim(), i: e.dataset.secIco || "grid" }; });
+  if (items.length < 2) { bar.hidden = true; return; }
+  const inn = bar.querySelector(".dnav-in"); inn.innerHTML = items.map((x) => `<a href="#${x.id}">${ico(x.i)}${pesc2(x.t)}</a>`).join(""); bar.hidden = false;
+  const links = [...inn.children], spy = () => { let cur = 0; items.forEach((x, k) => { const el = document.getElementById(x.id); if (el && el.getBoundingClientRect().top < 160) cur = k; }); links.forEach((a, k) => a.classList.toggle("on", k === cur)); };
+  if (!window._spy) { window._spy = true; addEventListener("scroll", () => window._spyFn && window._spyFn(), { passive: true }); }
+  window._spyFn = spy; spy();
+}
+const pesc2 = (t) => String(t).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const CORE_ICON = `<svg class="core-ic" viewBox="0 0 160 160" aria-hidden="true"><defs><linearGradient id="cg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#18a4ab"/><stop offset="1" stop-color="#0c6f82"/></linearGradient></defs><circle cx="80" cy="80" r="76" fill="#fff"/><g class="ci-ring"><circle cx="80" cy="80" r="62" fill="none" stroke="#4fa39a" stroke-width="5" stroke-linecap="round" stroke-dasharray="0.1 10.8"/></g><circle cx="80" cy="80" r="42" fill="url(#cg)"/><text x="80" y="101" text-anchor="middle" font-family="Tajawal,Tahoma,Arial,sans-serif" font-size="70" font-weight="800" fill="#fff">ن</text><g class="ci-orb"><circle cx="80" cy="16" r="8" fill="#f0b34a"/><circle cx="24.6" cy="112" r="8" fill="#e0955a"/><circle cx="135.4" cy="112" r="8" fill="#4fa39a"/></g></svg>`;
 function pubInit(active) {
   const h = document.getElementById("hdr"); if (h) h.outerHTML = pubHeader(active);
   const f = document.getElementById("ftr"); if (f) f.outerHTML = footerHTML;
   document.querySelectorAll("[data-core]").forEach((e) => (e.innerHTML = CORE_ICON));
   document.querySelectorAll("[data-ico]").forEach((e) => (e.innerHTML = ico(e.dataset.ico)));
-  bindNav();
+  bindNav(); pubSubnav();
   try { if (Object.keys(localStorage).some((k) => /^sb-.*-auth-token$/.test(k))) document.querySelectorAll("[data-login]").forEach((a) => { a.innerHTML = ico("chart") + "لوحة التحكم"; a.href = "dashboard.html"; }); } catch (e) {}
   const rv = document.querySelectorAll(".rv"), reduce = matchMedia("(prefers-reduced-motion:reduce)").matches;
   const count = (el) => { const to = +el.dataset.count, t0 = performance.now(); if (reduce) { el.textContent = to; return; } const step = (t) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); }; requestAnimationFrame(step); };
