@@ -176,6 +176,23 @@ async function adminRoute(req: Request, path: string) {
     }
     return json({ ok: true, user_id: created.user.id, login_id: isEmail ? null : ident });
   }
+  if (path === "/admin/set-login-id") {
+    if (!s.user_id) return json({ error: "no_account" }, 409);
+    const id = String(body.login_id ?? "").trim().toLowerCase();
+    if (!LOGIN_ID.test(id)) return json({ error: "invalid_login_id" }, 400);
+    const { data: taken } = await db.from("staff_private").select("staff_id").ilike("login_id", id).neq("staff_id", staffId).maybeSingle();
+    if (taken) return json({ error: "login_id_taken" }, 409);
+    const { data: cur } = await db.auth.admin.getUserById(s.user_id);
+    const oldEmail = cur?.user?.email;
+    const { error } = await db.auth.admin.updateUserById(s.user_id, { email: `${id}@${LOGIN_DOMAIN}`, email_confirm: true });
+    if (error) return json({ error: /already|registered|exists/i.test(error.message) ? "login_id_taken" : error.message }, 409);
+    const { error: e3 } = await db.from("staff_private").upsert({ staff_id: staffId, login_id: id }, { onConflict: "staff_id" });
+    if (e3) {
+      if (oldEmail) await db.auth.admin.updateUserById(s.user_id, { email: oldEmail, email_confirm: true });
+      return json({ error: /login_id_uq/.test(e3.message) ? "login_id_taken" : e3.message }, 409);
+    }
+    return json({ ok: true, login_id: id });
+  }
   if (path === "/admin/set-status") {
     if (!s.user_id) return json({ error: "no_account" }, 409);
     const st = String(body.status ?? "");

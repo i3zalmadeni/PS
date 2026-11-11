@@ -86,13 +86,14 @@ boot("staff.html", async (m, c) => {
   function account(r) {
     const md = modal(`<h3>حساب الدخول: ${esc(r.full_name)}</h3><p>الحالة الحالية: <b>${L.acct[r.account_status]}</b></p>${r.user_id ? `<p>معرّف الدخول: <b dir="ltr">${esc((priv[r.id] || {}).login_id || (priv[r.id] || {}).email || "—")}</b></p>` : ""}
       ${r.user_id ? `<div class="acts"><button class="btn ${r.account_status === "suspended" ? "" : "bad"}" id="tg">${r.account_status === "suspended" ? "تفعيل الحساب" : "إيقاف الحساب"}</button></div>
-        <h3 class="sec">إعادة تعيين كلمة المرور</h3><div class="bar"><input id="np" type="password" placeholder="10 أحرف على الأقل" autocomplete="new-password"><button class="btn" id="rp">تعيين</button></div>`
+        <h3 class="sec">تغيير معرّف الدخول</h3><div class="bar"><input id="nl" dir="ltr" autocapitalize="none" spellcheck="false" placeholder="معرّف جديد (3 إلى 40 خانة)" value="${esc((priv[r.id] || {}).login_id)}"><button class="btn" id="sl">حفظ المعرّف</button></div><h3 class="sec">إعادة تعيين كلمة المرور</h3><div class="bar"><input id="np" type="password" placeholder="10 أحرف على الأقل" autocomplete="new-password"><button class="btn" id="rp">تعيين</button></div>`
       : `<div class="fg"><div><label>معرّف الدخول (أرقام أو حروف إنجليزية، 3 إلى 40 خانة)</label><input id="ae" dir="ltr" autocapitalize="none" spellcheck="false" placeholder="مثال: 1012345 أو t.salem" value="${esc((priv[r.id] || {}).login_id)}"></div><div><label>كلمة المرور المؤقتة (10 أحرف على الأقل)</label><input id="ap" type="password" autocomplete="new-password"></div></div><div class="acts mt"><button class="btn" id="mk">إنشاء الحساب</button></div>`}
       <p class="err" id="ae2"></p>`);
     const run = async (fn) => { try { await fn(); md.close(); toast("تم"); await load(); draw(); } catch (e) { md.el.querySelector("#ae2").textContent = e.message; } };
     const g = (i) => md.el.querySelector(i);
     if (g("#mk")) g("#mk").onclick = () => run(() => api("/admin/create-account", { staff_id: r.id, login_id: g("#ae").value, password: g("#ap").value }));
     if (g("#tg")) g("#tg").onclick = () => run(() => api("/admin/set-status", { staff_id: r.id, status: r.account_status === "suspended" ? "active" : "suspended" }));
+    if (g("#sl")) g("#sl").onclick = () => run(() => api("/admin/set-login-id", { staff_id: r.id, login_id: g("#nl").value }));
     if (g("#rp")) g("#rp").onclick = () => run(() => api("/admin/reset-password", { staff_id: r.id, password: g("#np").value }));
   }
 
