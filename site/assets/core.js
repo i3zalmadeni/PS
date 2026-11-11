@@ -109,10 +109,17 @@ async function boot(page, render, o = {}) {
   if ((o.admin && !isAdmin) || (o.perm && !can(o.perm))) { location.replace("dashboard.html"); return; }
   const ctx = { me, isAdmin, can, uid: session.user.id };
   const items = NAV.filter((n) => !n[4] || (n[4] === "admin" ? isAdmin : can(n[4])));
+  const cur = NAV.find((n) => n[0] === page) || [page, "لوحة التحكم", "grid", "لوحة تحكم النواة الرقمية"];
   document.getElementById("shell").innerHTML =
-    `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
-     <nav><a href="index.html">الموقع</a><a href="data.html">بيانات المدرسة</a><a href="dashboard.html" class="on">لوحة التحكم</a></nav><span class="who">${ico("user")}${esc(me.full_name)}</span>${headMoe}<a class="loginbtn" href="#" id="out">خروج</a></div>
-     <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}>${ico(e)}${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
+    `<header class="dash"><div class="wrap top">${brandHTML("dashboard.html")}<div class="idl"><a class="sitelink" href="index.html">الموقع الإلكتروني</a>${headMoe}</div></div>
+     <div class="strip" aria-hidden="true"></div>
+     <div class="dnav"><div class="wrap dn"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}>${ico(e)}${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div>
+     <div class="dwho"><span class="dname">${esc(me.full_name)}</span><a class="loginbtn" href="#" id="out">خروج</a></div></div></div></header>
+     <div class="pagebar"><div class="wrap pb"><div class="pb-t"><small>${isAdmin ? "مدير النواة الرقمية" : "لوحة التحكم"}</small><h1>${esc(cur[1])}</h1></div><p class="pb-d">${esc(cur[3])}</p>
+     <div class="pb-u"><span id="pbTime"></span><button class="btn sec sm" id="pbRefresh" type="button">${ico("refresh")}تحديث</button></div></div></div>
+     <main class="wrap" id="main"></main>${footerHTML}`; bindNav();
+  document.getElementById("pbTime").textContent = "حُدِّثت " + new Date().toLocaleTimeString("ar-SA-u-nu-latn", { hour: "numeric", minute: "2-digit" });
+  document.getElementById("pbRefresh").onclick = () => location.reload();
   document.getElementById("out").onclick = (e) => { e.preventDefault(); doLogout(); };
   sb.rpc("school_stats").then(({ data }) => { if (data) document.querySelectorAll("[data-b]").forEach((e) => { const v = data[e.dataset.b]; if (v !== undefined) e.textContent = v; }); });
   const main = document.getElementById("main");
