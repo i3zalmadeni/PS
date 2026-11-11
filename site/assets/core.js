@@ -49,7 +49,7 @@ function mapErr(e) {
 async function api(path, body) {
   const { data: { session } } = await sb.auth.getSession();
   const r = await fetch(FN + path, { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token, apikey: APP_CONFIG.supabaseKey }, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", invalid_login_id: "المعرّف من 3 إلى 40 خانة: أرقام أو حروف إنجليزية، ويمكن استخدام . _ -", login_id_taken: "هذا المعرّف مستخدم لحساب آخر", email_taken: "هذا البريد مستخدم لحساب آخر", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", invalid_login_id: "المعرّف من 3 إلى 40 خانة: أرقام أو حروف إنجليزية، ويمكن استخدام . _ -", login_id_taken: "هذا المعرّف مستخدم لحساب آخر", email_taken: "هذا البريد مستخدم لحساب آخر", email_required: "لا يمكن حذف بريد حساب يدخل بالبريد؛ حوّله إلى معرّف أولاً", no_account: "لا حساب لهذا المنسوب", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
 }
 
 // تصدير جدول إلى Excel

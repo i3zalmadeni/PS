@@ -17,6 +17,7 @@ const sha256 = async (s: string) =>
 // حسابات المعرّف تُسجَّل داخلياً ببريد غير حقيقي بهذا النطاق (يجب أن يطابق LOGIN_DOMAIN في site/assets/config.js)
 const LOGIN_DOMAIN = "id.invalid";
 const LOGIN_ID = /^[a-z0-9][a-z0-9._-]{2,39}$/;
+const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // الحقول المتاحة للأنظمة المستقلة: لا بيانات تواصل ولا عناوين
@@ -157,10 +158,12 @@ async function adminRoute(req: Request, path: string) {
     const ident = String(body.login_id ?? body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");
     const isEmail = ident.includes("@");
-    if (isEmail ? !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ident) : !LOGIN_ID.test(ident)) return json({ error: isEmail ? "invalid_email" : "invalid_login_id" }, 400);
+    if (isEmail ? !EMAIL.test(ident) : !LOGIN_ID.test(ident)) return json({ error: isEmail ? "invalid_email" : "invalid_login_id" }, 400);
     if (password.length < 10) return json({ error: "password_too_short", min: 10 }, 400);
+    const contact = isEmail ? "" : String(body.contact_email ?? "").trim().toLowerCase();
+    if (contact && !EMAIL.test(contact)) return json({ error: "invalid_email" }, 400);
     if (!isEmail) {
-      const { data: taken } = await db.from("staff_private").select("staff_id").ilike("login_id", ident).neq("staff_id", staffId).maybeSingle();
+      const { data: taken } = await db.from("staff_private").select("staff_id").eq("login_id", ident).neq("staff_id", staffId).maybeSingle();
       if (taken) return json({ error: "login_id_taken" }, 409);
     }
     const email = isEmail ? ident : `${ident}@${LOGIN_DOMAIN}`;
@@ -168,7 +171,7 @@ async function adminRoute(req: Request, path: string) {
     if (error || !created.user) return json({ error: /already|registered|exists/i.test(error?.message ?? "") ? (isEmail ? "email_taken" : "login_id_taken") : (error?.message ?? "create_failed") }, isEmail ? 400 : 409);
     const { error: e2 } = await db.from("staff_members").update({ user_id: created.user.id, account_status: "active" }).eq("id", staffId);
     if (e2) { await db.auth.admin.deleteUser(created.user.id); return json({ error: e2.message }, 400); }
-    const { error: e3 } = await db.from("staff_private").upsert(isEmail ? { staff_id: staffId, email: ident } : { staff_id: staffId, login_id: ident }, { onConflict: "staff_id" });
+    const { error: e3 } = await db.from("staff_private").upsert(isEmail ? { staff_id: staffId, email: ident } : { staff_id: staffId, login_id: ident, ...(contact ? { email: contact } : {}) }, { onConflict: "staff_id" });
     if (e3) {
       await db.from("staff_members").update({ user_id: null, account_status: "none" }).eq("id", staffId);
       await db.auth.admin.deleteUser(created.user.id);
@@ -180,7 +183,7 @@ async function adminRoute(req: Request, path: string) {
     if (!s.user_id) return json({ error: "no_account" }, 409);
     const id = String(body.login_id ?? "").trim().toLowerCase();
     if (!LOGIN_ID.test(id)) return json({ error: "invalid_login_id" }, 400);
-    const { data: taken } = await db.from("staff_private").select("staff_id").ilike("login_id", id).neq("staff_id", staffId).maybeSingle();
+    const { data: taken } = await db.from("staff_private").select("staff_id").eq("login_id", id).neq("staff_id", staffId).maybeSingle();
     if (taken) return json({ error: "login_id_taken" }, 409);
     const { data: cur } = await db.auth.admin.getUserById(s.user_id);
     const oldEmail = cur?.user?.email;
@@ -192,6 +195,33 @@ async function adminRoute(req: Request, path: string) {
       return json({ error: /login_id_uq/.test(e3.message) ? "login_id_taken" : e3.message }, 409);
     }
     return json({ ok: true, login_id: id });
+  }
+  if (path === "/admin/set-email") {
+    if (!s.user_id) return json({ error: "no_account" }, 409);
+    const email = String(body.email ?? "").trim().toLowerCase();
+    const { data: cur } = await db.auth.admin.getUserById(s.user_id);
+    const oldEmail = cur?.user?.email ?? "";
+    // حساب يدخل بالبريد: تغيير البريد يغيّر بريد الدخول أيضاً. حساب يدخل بمعرّف: البريد للتواصل فقط.
+    const byEmail = !oldEmail.endsWith("@" + LOGIN_DOMAIN);
+    if (!email) {
+      if (byEmail) return json({ error: "email_required" }, 400);
+      const { error } = await db.from("staff_private").upsert({ staff_id: staffId, email: null }, { onConflict: "staff_id" });
+      if (error) return json({ error: error.message }, 400);
+      return json({ ok: true, email: null, login_changed: false });
+    }
+    if (!EMAIL.test(email) || email.endsWith("@" + LOGIN_DOMAIN)) return json({ error: "invalid_email" }, 400);
+    const { data: taken } = await db.from("staff_private").select("staff_id").eq("email", email).neq("staff_id", staffId).maybeSingle();
+    if (taken) return json({ error: "email_taken" }, 409);
+    if (byEmail) {
+      const { error } = await db.auth.admin.updateUserById(s.user_id, { email, email_confirm: true });
+      if (error) return json({ error: /already|registered|exists/i.test(error.message) ? "email_taken" : error.message }, 409);
+    }
+    const { error: e3 } = await db.from("staff_private").upsert({ staff_id: staffId, email }, { onConflict: "staff_id" });
+    if (e3) {
+      if (byEmail && oldEmail) await db.auth.admin.updateUserById(s.user_id, { email: oldEmail, email_confirm: true });
+      return json({ error: /email_uq/.test(e3.message) ? "email_taken" : e3.message }, 409);
+    }
+    return json({ ok: true, email, login_changed: byEmail });
   }
   if (path === "/admin/set-status") {
     if (!s.user_id) return json({ error: "no_account" }, 409);

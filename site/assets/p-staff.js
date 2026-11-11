@@ -58,7 +58,7 @@ boot("staff.html", async (m, c) => {
       <div><label>تاريخ الانضمام</label><input type="date" name="joined_on" value="${esc(r?.joined_on || today())}"></div>
       <div><label>الصورة (اختياري)</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></div>
       <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} style="width:auto"> إظهار الاسم والصورة والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)</label></div>
-      ${canContact ? `<div><label>الرقم الوظيفي</label><input name="employee_no" value="${esc(p.employee_no)}"></div><div><label>البريد الإلكتروني</label><input type="email" name="email" value="${esc(p.email)}"></div><div><label>الجوال</label><input name="phone" value="${esc(p.phone)}"></div>` : ""}
+      ${canContact ? `<div><label>الرقم الوظيفي</label><input name="employee_no" value="${esc(p.employee_no)}"></div><div><label>البريد الإلكتروني</label><input type="email" name="email" value="${esc(p.email)}"${r?.user_id && !p.login_id ? " readonly title=\"بريد الدخول: يُغيَّر من نافذة الحساب\"" : ""}></div><div><label>الجوال</label><input name="phone" value="${esc(p.phone)}"></div>` : ""}
       </div><p class="err" id="fe2"></p><div class="acts mt"><button class="btn">حفظ</button><button type="button" class="btn sec" id="cx">إلغاء</button></div></form>`);
     const f = md.el.querySelector("#sf"), cat = f.category, jt = f.job_title;
     const sync = () => (jt.innerHTML = T.filter((t) => t.category === cat.value).map((t) => `<option value="${t.code}" ${r?.job_title === t.code ? "selected" : ""}>${esc(t.name_ar)}</option>`).join(""));
@@ -84,17 +84,36 @@ boot("staff.html", async (m, c) => {
   }
 
   function account(r) {
-    const md = modal(`<h3>حساب الدخول: ${esc(r.full_name)}</h3><p>الحالة الحالية: <b>${L.acct[r.account_status]}</b></p>${r.user_id ? `<p>معرّف الدخول: <b dir="ltr">${esc((priv[r.id] || {}).login_id || (priv[r.id] || {}).email || "—")}</b></p>` : ""}
-      ${r.user_id ? `<div class="acts"><button class="btn ${r.account_status === "suspended" ? "" : "bad"}" id="tg">${r.account_status === "suspended" ? "تفعيل الحساب" : "إيقاف الحساب"}</button></div>
-        <h3 class="sec">تغيير معرّف الدخول</h3><div class="bar"><input id="nl" dir="ltr" autocapitalize="none" spellcheck="false" placeholder="معرّف جديد (3 إلى 40 خانة)" value="${esc((priv[r.id] || {}).login_id)}"><button class="btn" id="sl">حفظ المعرّف</button></div><h3 class="sec">إعادة تعيين كلمة المرور</h3><div class="bar"><input id="np" type="password" placeholder="10 أحرف على الأقل" autocomplete="new-password"><button class="btn" id="rp">تعيين</button></div>`
-      : `<div class="fg"><div><label>معرّف الدخول (أرقام أو حروف إنجليزية، 3 إلى 40 خانة)</label><input id="ae" dir="ltr" autocapitalize="none" spellcheck="false" placeholder="مثال: 1012345 أو t.salem" value="${esc((priv[r.id] || {}).login_id)}"></div><div><label>كلمة المرور المؤقتة (10 أحرف على الأقل)</label><input id="ap" type="password" autocomplete="new-password"></div></div><div class="acts mt"><button class="btn" id="mk">إنشاء الحساب</button></div>`}
-      <p class="err" id="ae2"></p>`);
-    const run = async (fn) => { try { await fn(); md.close(); toast("تم"); await load(); draw(); } catch (e) { md.el.querySelector("#ae2").textContent = e.message; } };
+    const p = priv[r.id] || {}, byId = !!p.login_id, S = 'dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false"';
+    const gen = () => { const a = "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return [...crypto.getRandomValues(new Uint32Array(12))].map((x) => a[x % a.length]).join(""); };
+    const row = (id, label, field, btns, hint) => `<div class="acr"><label for="${id}">${label}</label><div class="bar">${field}${btns}</div>${hint ? `<small class="sub">${hint}</small>` : ""}</div>`;
+    const html = r.user_id
+      ? `<h3>إدارة الحساب</h3><p>الحالة: <b>${L.acct[r.account_status]}</b> · الدخول بـ: <b>${byId ? "معرّف" : "بريد إلكتروني"}</b></p>
+        ${row("nm", "الاسم الكامل", `<input id="nm" value="${esc(r.full_name)}" maxlength="200">`, '<button class="btn" id="snm">حفظ الاسم</button>')}
+        ${row("nl", "معرّف الدخول", `<input id="nl" ${S} value="${esc(p.login_id)}" placeholder="${byId ? "" : "اكتب معرّفاً لتحويل الدخول من البريد إلى معرّف"}">`, '<button class="btn" id="sl">حفظ المعرّف</button>', "أرقام أو حروف إنجليزية، من 3 إلى 40 خانة، ويمكن استخدام . _ -")}
+        ${row("ne", "البريد الإلكتروني", `<input id="ne" type="email" ${S} value="${esc(p.email)}" placeholder="اختياري">`, '<button class="btn" id="se">حفظ البريد</button>', byId ? "للتواصل فقط، ولا يؤثر على الدخول." : "هذا الحساب يدخل بالبريد، فتغييره يغيّر بريد الدخول أيضاً.")}
+        ${row("np", "كلمة مرور جديدة", `<input id="np" type="password" ${S} autocomplete="new-password" placeholder="10 أحرف على الأقل">`, '<button class="btn sec" id="gp" type="button">توليد</button><button class="btn" id="rp">تعيين</button>', "«توليد» تنشئ كلمة قوية وتعرضها لتسلّمها للمنسوب قبل التعيين.")}
+        <div class="acts"><button class="btn ${r.account_status === "suspended" ? "" : "bad"}" id="tg">${r.account_status === "suspended" ? "تفعيل الحساب" : "إيقاف الحساب"}</button><button class="btn sec" id="cl">إغلاق</button></div>
+        <p class="err" id="ae2"></p>`
+      : `<h3>إنشاء حساب: ${esc(r.full_name)}</h3>
+        ${row("ae", "معرّف الدخول", `<input id="ae" ${S} placeholder="مثال: 1012345 أو t.salem">`, "", "أرقام أو حروف إنجليزية، من 3 إلى 40 خانة")}
+        ${row("ap", "كلمة المرور المؤقتة", `<input id="ap" type="password" ${S} autocomplete="new-password" placeholder="10 أحرف على الأقل">`, '<button class="btn sec" id="gp" type="button">توليد</button>')}
+        ${row("ac", "البريد الإلكتروني (اختياري)", `<input id="ac" type="email" ${S} value="${esc(p.email)}">`, "", "للتواصل فقط")}
+        <div class="acts"><button class="btn" id="mk">إنشاء الحساب</button><button class="btn sec" id="cl">إغلاق</button></div><p class="err" id="ae2"></p>`;
+    const md = modal(html);
     const g = (i) => md.el.querySelector(i);
-    if (g("#mk")) g("#mk").onclick = () => run(() => api("/admin/create-account", { staff_id: r.id, login_id: g("#ae").value, password: g("#ap").value }));
-    if (g("#tg")) g("#tg").onclick = () => run(() => api("/admin/set-status", { staff_id: r.id, status: r.account_status === "suspended" ? "active" : "suspended" }));
-    if (g("#sl")) g("#sl").onclick = () => run(() => api("/admin/set-login-id", { staff_id: r.id, login_id: g("#nl").value }));
-    if (g("#rp")) g("#rp").onclick = () => run(() => api("/admin/reset-password", { staff_id: r.id, password: g("#np").value }));
+    const msg = (t, bad) => { g("#ae2").textContent = bad ? t : ""; if (!bad) toast(t); };
+    // يحفظ ثم يعيد فتح النافذة بالقيم الجديدة ليتابع المدير تعديلاً آخر دون عودة للقائمة
+    const run = (fn, ok = "تم الحفظ", reopen = true) => async () => { try { await fn(); await load(); draw(); if (reopen) { md.close(); account(rows.find((x) => x.id === r.id)); } toast(ok); } catch (e) { msg(e.message || mapErr(e), true); } };
+    g("#cl").onclick = md.close;
+    if (g("#gp")) g("#gp").onclick = () => { const f = g("#np") || g("#ap"); f.type = "text"; f.value = gen(); };
+    if (g("#mk")) g("#mk").onclick = run(() => api("/admin/create-account", { staff_id: r.id, login_id: g("#ae").value, password: g("#ap").value, contact_email: g("#ac").value }), "تم إنشاء الحساب");
+    if (!r.user_id) return;
+    g("#snm").onclick = run(async () => { const v = g("#nm").value.trim(); if (v.length < 2 || v.length > 200) throw new Error("الاسم من حرفين إلى 200 حرف"); const res = await sb.from("staff_members").update({ full_name: v }).eq("id", r.id); if (res.error) throw res.error; });
+    g("#sl").onclick = run(() => api("/admin/set-login-id", { staff_id: r.id, login_id: g("#nl").value }));
+    g("#se").onclick = run(() => api("/admin/set-email", { staff_id: r.id, email: g("#ne").value }));
+    g("#rp").onclick = run(() => api("/admin/reset-password", { staff_id: r.id, password: g("#np").value }), "تم تعيين كلمة المرور", false);
+    g("#tg").onclick = run(() => api("/admin/set-status", { staff_id: r.id, status: r.account_status === "suspended" ? "active" : "suspended" }), "تم");
   }
 
   function openImport() {

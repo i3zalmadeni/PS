@@ -24,7 +24,7 @@
 - كل طلب (ناجح أو مرفوض بعد المصادقة) يُسجَّل في `system_access_logs`.
 - النظام الموقوف مرفوض (401). المعرّفات UUID ثابتة عبر الأعوام.
 - مسارات `/admin/*` للمستخدم المدير فقط (إنشاء الحسابات وإيقافها وتعيين كلمات المرور).
-- الدخول بمعرّف: `POST /admin/create-account` يقبل `login_id` (أرقام أو حروف إنجليزية صغيرة/كبيرة و`. _ -`، من 3 إلى 40 خانة) بدل البريد، فيُنشأ حساب Supabase Auth ببريد داخلي `<المعرّف>@id.invalid` ويُحفظ المعرّف في `staff_private.login_id` (فريد). تسجيل الدخول يحوّل المعرّف إلى هذا البريد تلقائياً، والحسابات القديمة بالبريد الحقيقي تعمل كما هي. أخطاء: `invalid_login_id`، `login_id_taken`. تغيير المعرّف لاحقاً: `POST /admin/set-login-id` بـ `{staff_id, login_id}`.
+- الدخول بمعرّف: `POST /admin/create-account` يقبل `login_id` (أرقام أو حروف إنجليزية صغيرة/كبيرة و`. _ -`، من 3 إلى 40 خانة) بدل البريد، فيُنشأ حساب Supabase Auth ببريد داخلي `<المعرّف>@id.invalid` ويُحفظ المعرّف في `staff_private.login_id` (فريد). تسجيل الدخول يحوّل المعرّف إلى هذا البريد تلقائياً، والحسابات القديمة بالبريد الحقيقي تعمل كما هي. أخطاء: `invalid_login_id`، `login_id_taken`. تغيير المعرّف لاحقاً: `POST /admin/set-login-id` بـ `{staff_id, login_id}`. تغيير البريد: `POST /admin/set-email` بـ `{staff_id, email}` (حساب يدخل بالبريد: يتغير بريد الدخول أيضاً؛ حساب يدخل بمعرّف: بريد تواصل فقط ويمكن تركه فارغاً). عند الإنشاء يمكن إرسال `contact_email` اختيارياً. الاسم وكلمة المرور والإيقاف: من نافذة «الحساب» (`/admin/reset-password` و`/admin/set-status`).
 
 ## الأخطاء
 `401 missing_system_key | invalid_system_key`، `403 scope_required`، `404 not_found`، `405 read_only_api`، `400 bad_request`.

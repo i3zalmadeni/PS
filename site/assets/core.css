@@ -874,3 +874,5 @@ a.pg-b:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
 a.pg-b:focus-visible{outline:3px solid #f6c25e;outline-offset:2px}
 .pg-b .ico{width:18px;height:18px;stroke:#0c6f82;transition:transform .3s}a.pg-b:hover .ico{transform:translateX(-6px)}
 .pg-b.off{background:rgba(255,255,255,.18);color:#fff;cursor:default}
+
+.acr{margin-bottom:12px}.acr label{display:block;font-weight:700;margin-bottom:4px}.acr .bar{margin-bottom:4px}.acr small{display:block}
