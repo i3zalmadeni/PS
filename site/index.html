@@ -7,6 +7,7 @@
 <div class="hlogo" aria-hidden="true"><span class="hr r1"></span><span class="hr r2"></span><span class="hg"></span><div class="hcore" data-core></div></div></div></section>
 <section class="hsec" id="team"><div class="hh rv"><div><small>الأسرة</small><h2>فريق العمل</h2></div><a href="people.html" class="hl-a">عرض الأسرة كاملة <i data-ico="arrow"></i></a></div>
 <div class="ribbon rv" id="ribbon" aria-label="فريق العمل"><div class="rb-track" id="rbt"></div></div></section>
+<section class="hsec" id="intro"><div class="intro rv"><span class="intro-e" data-core></span><div><h3 id="in-t">متوسطة لبيد بن ربيعة</h3><p id="in-p">مدرسة متوسطة تعرّفك بها النواة الرقمية.</p></div><div class="intro-l"><a class="btn sm" href="about.html">تعرّف على النواة</a><a class="btn sm sec" href="data.html">بيانات المدرسة</a></div></div></section>
 <section class="hsec" id="nums"><div class="hh rv"><div><small>المدرسة</small><h2>المدرسة بالأرقام</h2></div><a href="data.html" class="hl-a">كل بيانات المدرسة <i data-ico="arrow"></i></a></div>
 <div class="nbar rv"><div class="nb"><span class="nb-i" data-ico="users"></span><b data-live="personnel">0</b><small>منسوباً</small></div><div class="nb"><span class="nb-i" data-ico="cap"></span><b data-live="students">0</b><small>متعلماً</small></div><div class="nb"><span class="nb-i" data-ico="grid"></span><b data-live="classes">0</b><small>فصلاً دراسياً</small></div><div class="nb"><span class="nb-i" data-ico="building"></span><b data-live="facilities">0</b><small>مرفقاً</small></div></div></section>
 <section class="hsec" id="about-h"><div class="hh rv"><div><small>النواة</small><h2>ما الذي ستجده هنا؟</h2></div></div>
@@ -18,6 +19,9 @@ pubInit("index.html");
 const PH=(x)=>x.photo?APP_CONFIG.supabaseUrl+"/storage/v1/object/public/public-photos/"+encodeURI(x.photo):"";
 Promise.all([loadOverview(),loadStaff()]).then(([o,st])=>{
   fillLive(o);
+  { const sc=o?.school||{},ld=(st?.staff||[]).filter(x=>x.leader)[0],n=o?.totals?.personnel;
+    const g={boys:"للبنين",girls:"للبنات",mixed:"مختلطة"}[sc.gender]||"";
+    const e=document.getElementById("in-p"); if(o?.published){ e.innerHTML=`مدرسة ${pesc([sc.stage,sc.type].filter(Boolean).join(" "))||"متوسطة"} ${g}${ld?`، بقيادة <b>${pesc(ld.name)}</b>`:""}${n?`، ويعمل بها <b>${n}</b> منسوباً`:""}.`; document.getElementById("in-t").textContent=sc.name||"متوسطة لبيد بن ربيعة"; } }
   const set=(i,v)=>{const e=document.getElementById(i);if(e)e.textContent=v};
   set("pn1","كيف تعمل؟");set("pn2",o?.published&&o.totals?o.totals.students+" متعلماً":"");
   const L=st&&st.published?(st.staff||[]):[];set("pn3",L.length?L.length+" منسوباً":"");
