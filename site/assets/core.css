@@ -773,3 +773,6 @@ a.idc-c:hover{background:var(--acc2soft)}
 .sys b{display:block;font-size:1.1rem}.sys small{color:var(--ink2)}
 .sys em{position:absolute;top:12px;inset-inline-end:14px;font-style:normal;font-size:.75rem;font-weight:800;color:#a35f0a;background:#fdf0d3;padding:2px 10px;border-radius:99px}
 @media (max-width:820px){.syss{grid-template-columns:1fr}}
+.dr .x-two,.dr .x-rm,.dr .x-tm,.dr .x-pm{margin-top:6px}
+.dr .ax-eqi small{display:block;font-size:.8rem;color:var(--ink2);font-weight:600}.dr .ax-eqi b{font-size:1.7rem}
+.dr .ax-what h2{font-size:clamp(1.6rem,3vw,2.3rem)}
