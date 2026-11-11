@@ -868,3 +868,9 @@ a.sys:hover .sy-go{transform:translateX(-4px)}
 .cd-t small{opacity:.85;font-size:.78rem}
 .cd-t strong{font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media (max-width:820px){.pans.sysp{height:auto}.sysp .pan{min-height:230px}.sysp .pan .pd{max-height:80px}}
+.sysp .pan:focus-within{flex:2.2}.sysp .pan:focus-within .pd{max-height:70px}
+.pg-b{display:inline-flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;padding:10px 18px;border-radius:14px;background:#fff;color:#0c6f82;font-weight:800;text-decoration:none;transition:transform .25s,box-shadow .25s}
+a.pg-b:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(0,0,0,.2)}
+a.pg-b:focus-visible{outline:3px solid #f6c25e;outline-offset:2px}
+.pg-b .ico{width:18px;height:18px;stroke:#0c6f82;transition:transform .3s}a.pg-b:hover .ico{transform:translateX(-6px)}
+.pg-b.off{background:rgba(255,255,255,.18);color:#fff;cursor:default}
