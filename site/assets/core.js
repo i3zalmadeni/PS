@@ -82,10 +82,19 @@ const NAV = [["dashboard.html", "الرئيسية", "home", "ملخص النوا
 async function boot(page, render, o = {}) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { location.replace("login.html"); return; }
-  const { data: me } = await sb.from("staff_members").select("id,full_name,category,job_title").eq("user_id", session.user.id).maybeSingle();
+  // خطأ في القراءة (صلاحيات/شبكة) لا يعني أن الحساب غير مرتبط: لا نُخرج المستخدم بسببه.
+  const fail = (err) => {
+    console.error(err);
+    const msg = /permission denied|row-level security/i.test(err?.message || "") ? "لا تملك حسابك صلاحية قراءة بياناتك من النواة. تواصل مع مدير النظام." : "تعذر الاتصال بالخادم أو التحقق من حسابك.";
+    document.getElementById("shell").innerHTML = `<main class="wrap"><div class="card" style="max-width:520px;margin:48px auto"><h3 style="margin-top:0">تعذر فتح لوحة التحكم</h3><p class="err">${esc(msg)}</p><div class="acts mt"><button class="btn" id="rt">إعادة المحاولة</button><button class="btn sec" id="lo">تسجيل الخروج</button></div></div></main>`;
+    document.getElementById("rt").onclick = () => location.reload();
+    document.getElementById("lo").onclick = async () => { await sb.auth.signOut(); location.replace("login.html"); };
+  };
+  const { data: me, error: meErr } = await sb.from("staff_members").select("id,full_name,category,job_title").eq("user_id", session.user.id).maybeSingle();
+  if (meErr) { fail(meErr); return; }
   if (!me) { await sb.auth.signOut(); location.replace("login.html?e=nostaff"); return; }
-  const { data: adm } = await sb.rpc("is_core_admin"); const isAdmin = adm === true;
-  const { data: pr } = await sb.from("staff_permissions").select("permission_code").eq("staff_id", me.id);
+  const { data: adm, error: admErr } = await sb.rpc("is_core_admin"); if (admErr) { fail(admErr); return; } const isAdmin = adm === true;
+  const { data: pr, error: prErr } = await sb.from("staff_permissions").select("permission_code").eq("staff_id", me.id); if (prErr) { fail(prErr); return; }
   const have = new Set((pr || []).map((x) => x.permission_code));
   const can = (code) => {
     if (isAdmin) return true; const [r, l] = code.split(":");
