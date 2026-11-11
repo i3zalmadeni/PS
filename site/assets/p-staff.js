@@ -39,7 +39,7 @@ boot("staff.html", async (m, c) => {
   async function details(r) {
     const p = priv[r.id] || {}, img = await signed(r.photo_path);
     const md = modal(`<h3>${esc(r.full_name)}</h3><div class="row2" style="align-items:flex-start;gap:16px">${img ? `<img src="${img}" alt="" style="width:96px;height:96px;object-fit:cover;border-radius:12px">` : ""}<div class="fg" style="flex:1">
-      ${[["الفئة", r.staff_categories?.name_ar], ["المسمى", r.job_titles?.name_ar], ["التخصص", r.specialty], ["المؤهل", r.qualification], ["القسم", r.department], ["الحالة الوظيفية", L.emp[r.employment_status]], ["تاريخ الانضمام", fmt(r.joined_on)], ...(canContact ? [["الرقم الوظيفي", p.employee_no], ["البريد", p.email], ["الجوال", p.phone]] : [])]
+      ${[["الفئة", r.staff_categories?.name_ar], ["المسمى", r.job_titles?.name_ar], ["التخصص", r.specialty], ["المؤهل", r.qualification], ["القسم", r.department], ["الحالة الوظيفية", L.emp[r.employment_status]], ["تاريخ الانضمام", fmt(r.joined_on)], ...(canContact ? [["الرقم الوظيفي", p.employee_no], ["معرّف الدخول", p.login_id], ["البريد", p.email], ["الجوال", p.phone]] : [])]
         .map(([k, v]) => `<div><small class="sub">${k}</small><br><b>${esc(v || "—")}</b></div>`).join("")}</div></div><div class="acts mt"><button class="btn sec" id="h">سجل التغييرات</button><button class="btn sec" id="cx">إغلاق</button></div>`, true);
     md.el.querySelector("#cx").onclick = md.close; md.el.querySelector("#h").onclick = () => showHistory("staff_members", r.id, r.full_name);
   }
@@ -84,14 +84,14 @@ boot("staff.html", async (m, c) => {
   }
 
   function account(r) {
-    const md = modal(`<h3>حساب الدخول: ${esc(r.full_name)}</h3><p>الحالة الحالية: <b>${L.acct[r.account_status]}</b></p>
+    const md = modal(`<h3>حساب الدخول: ${esc(r.full_name)}</h3><p>الحالة الحالية: <b>${L.acct[r.account_status]}</b></p>${r.user_id ? `<p>معرّف الدخول: <b dir="ltr">${esc((priv[r.id] || {}).login_id || (priv[r.id] || {}).email || "—")}</b></p>` : ""}
       ${r.user_id ? `<div class="acts"><button class="btn ${r.account_status === "suspended" ? "" : "bad"}" id="tg">${r.account_status === "suspended" ? "تفعيل الحساب" : "إيقاف الحساب"}</button></div>
         <h3 class="sec">إعادة تعيين كلمة المرور</h3><div class="bar"><input id="np" type="password" placeholder="10 أحرف على الأقل" autocomplete="new-password"><button class="btn" id="rp">تعيين</button></div>`
-      : `<div class="fg"><div><label>البريد الإلكتروني</label><input id="ae" type="email" value="${esc((priv[r.id] || {}).email)}"></div><div><label>كلمة المرور المؤقتة (10 أحرف على الأقل)</label><input id="ap" type="password" autocomplete="new-password"></div></div><div class="acts mt"><button class="btn" id="mk">إنشاء الحساب</button></div>`}
+      : `<div class="fg"><div><label>معرّف الدخول (أرقام أو حروف إنجليزية، 3 إلى 40 خانة)</label><input id="ae" dir="ltr" autocapitalize="none" spellcheck="false" placeholder="مثال: 1012345 أو t.salem" value="${esc((priv[r.id] || {}).login_id)}"></div><div><label>كلمة المرور المؤقتة (10 أحرف على الأقل)</label><input id="ap" type="password" autocomplete="new-password"></div></div><div class="acts mt"><button class="btn" id="mk">إنشاء الحساب</button></div>`}
       <p class="err" id="ae2"></p>`);
     const run = async (fn) => { try { await fn(); md.close(); toast("تم"); await load(); draw(); } catch (e) { md.el.querySelector("#ae2").textContent = e.message; } };
     const g = (i) => md.el.querySelector(i);
-    if (g("#mk")) g("#mk").onclick = () => run(() => api("/admin/create-account", { staff_id: r.id, email: g("#ae").value, password: g("#ap").value }));
+    if (g("#mk")) g("#mk").onclick = () => run(() => api("/admin/create-account", { staff_id: r.id, login_id: g("#ae").value, password: g("#ap").value }));
     if (g("#tg")) g("#tg").onclick = () => run(() => api("/admin/set-status", { staff_id: r.id, status: r.account_status === "suspended" ? "active" : "suspended" }));
     if (g("#rp")) g("#rp").onclick = () => run(() => api("/admin/reset-password", { staff_id: r.id, password: g("#np").value }));
   }

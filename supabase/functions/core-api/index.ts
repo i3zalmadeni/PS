@@ -14,6 +14,9 @@ const json = (b: unknown, s = 200) =>
   new Response(JSON.stringify(b), { status: s, headers: { ...cors, "content-type": "application/json; charset=utf-8" } });
 const sha256 = async (s: string) =>
   [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)))].map((b) => b.toString(16).padStart(2, "0")).join("");
+// حسابات المعرّف تُسجَّل داخلياً ببريد غير حقيقي بهذا النطاق (يجب أن يطابق LOGIN_DOMAIN في site/assets/config.js)
+const LOGIN_DOMAIN = "id.invalid";
+const LOGIN_ID = /^[a-z0-9][a-z0-9._-]{2,39}$/;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // الحقول المتاحة للأنظمة المستقلة: لا بيانات تواصل ولا عناوين
@@ -150,16 +153,28 @@ async function adminRoute(req: Request, path: string) {
 
   if (path === "/admin/create-account") {
     if (s.user_id) return json({ error: "account_exists" }, 409);
-    const email = String(body.email ?? "").trim().toLowerCase();
+    // المعرّف: أرقام أو حروف إنجليزية (غير مرتبط ببريد). وللتوافق: إن احتوى على @ عُدَّ بريداً حقيقياً.
+    const ident = String(body.login_id ?? body.email ?? "").trim().toLowerCase();
     const password = String(body.password ?? "");
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return json({ error: "invalid_email" }, 400);
+    const isEmail = ident.includes("@");
+    if (isEmail ? !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(ident) : !LOGIN_ID.test(ident)) return json({ error: isEmail ? "invalid_email" : "invalid_login_id" }, 400);
     if (password.length < 10) return json({ error: "password_too_short", min: 10 }, 400);
+    if (!isEmail) {
+      const { data: taken } = await db.from("staff_private").select("staff_id").ilike("login_id", ident).neq("staff_id", staffId).maybeSingle();
+      if (taken) return json({ error: "login_id_taken" }, 409);
+    }
+    const email = isEmail ? ident : `${ident}@${LOGIN_DOMAIN}`;
     const { data: created, error } = await db.auth.admin.createUser({ email, password, email_confirm: true });
-    if (error || !created.user) return json({ error: error?.message ?? "create_failed" }, 400);
+    if (error || !created.user) return json({ error: /already|registered|exists/i.test(error?.message ?? "") ? (isEmail ? "email_taken" : "login_id_taken") : (error?.message ?? "create_failed") }, isEmail ? 400 : 409);
     const { error: e2 } = await db.from("staff_members").update({ user_id: created.user.id, account_status: "active" }).eq("id", staffId);
     if (e2) { await db.auth.admin.deleteUser(created.user.id); return json({ error: e2.message }, 400); }
-    await db.from("staff_private").upsert({ staff_id: staffId, email }, { onConflict: "staff_id" });
-    return json({ ok: true, user_id: created.user.id });
+    const { error: e3 } = await db.from("staff_private").upsert(isEmail ? { staff_id: staffId, email: ident } : { staff_id: staffId, login_id: ident }, { onConflict: "staff_id" });
+    if (e3) {
+      await db.from("staff_members").update({ user_id: null, account_status: "none" }).eq("id", staffId);
+      await db.auth.admin.deleteUser(created.user.id);
+      return json({ error: /login_id_uq/.test(e3.message) ? "login_id_taken" : /email_uq/.test(e3.message) ? "email_taken" : e3.message }, 409);
+    }
+    return json({ ok: true, user_id: created.user.id, login_id: isEmail ? null : ident });
   }
   if (path === "/admin/set-status") {
     if (!s.user_id) return json({ error: "no_account" }, 409);

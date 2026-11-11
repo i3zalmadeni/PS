@@ -5,6 +5,9 @@ window.APP_CONFIG = {
   supabaseKey: "sb_publishable_hfzNlh9tCpuC2zCf4T_2FA_42ujADOX",
 };
 
+// الدخول بمعرّف: يُترجم المعرّف داخلياً إلى بريد غير حقيقي بهذا النطاق (يطابق LOGIN_DOMAIN في دالة core-api).
+window.LOGIN_DOMAIN = "id.invalid";
+
 // منسقو الأنظمة المعروضون في بطاقات «الأنظمة» بالصفحة الرئيسية.
 // اكتب الاسم كما هو في قائمة المنسوبين المنشورة تماماً ليظهر معه صورته تلقائياً.
 window.SYSTEM_COORDINATORS = {

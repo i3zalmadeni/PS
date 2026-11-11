@@ -33,6 +33,7 @@ function modal(html, wide) {
 }
 function mapErr(e) {
   const m = e?.message || String(e);
+  if (/staff_private_login_id/.test(m)) return "معرّف الدخول مستخدم لمنسوب آخر.";
   if (/staff_private_email|staff_private_employee/.test(m)) return "البريد أو الرقم الوظيفي مستخدم لمنسوب آخر.";
   if (/students_student_no_key/.test(m)) return "رقم الطالب مستخدم لطالب آخر.";
   if (/student_enrollments_student_id_year_id_key/.test(m)) return "للمتعلم تسجيل في هذا العام بالفعل.";
@@ -48,7 +49,7 @@ function mapErr(e) {
 async function api(path, body) {
   const { data: { session } } = await sb.auth.getSession();
   const r = await fetch(FN + path, { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token, apikey: APP_CONFIG.supabaseKey }, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", invalid_login_id: "المعرّف من 3 إلى 40 خانة: أرقام أو حروف إنجليزية، ويمكن استخدام . _ -", login_id_taken: "هذا المعرّف مستخدم لحساب آخر", email_taken: "هذا البريد مستخدم لحساب آخر", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
 }
 
 // تصدير جدول إلى Excel
