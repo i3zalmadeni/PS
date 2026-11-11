@@ -15,7 +15,7 @@ boot("school.html", async (m, c) => {
   const cur = () => years.find((y) => y.status === "current");
   const TABS = [["profile", "بيانات المدرسة"], ["lead", "القيادة المدرسية"], ["years", "الأعوام الدراسية"], ["classes", "المراحل والفصول"]];
   function paint() {
-    m.innerHTML = head("سجل المدرسة", "الملف المعلوماتي المركزي للمدرسة") + `<div class="tabs">${TABS.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? "on" : ""}">${n}</button>`).join("")}</div><div id="body"></div>`;
+    m.innerHTML = head("المدرسة", "الملف المعلوماتي المركزي للمدرسة") + `<div class="tabs">${TABS.map(([k, n]) => `<button data-t="${k}" class="${k === tab ? "on" : ""}">${n}</button>`).join("")}</div><div id="body"></div>`;
     m.querySelectorAll("[data-t]").forEach((b) => (b.onclick = () => { tab = b.dataset.t; paint(); }));
     ({ profile, lead: leadership, years: yearsTab, classes })[tab](m.querySelector("#body"));
   }
@@ -39,7 +39,7 @@ boot("school.html", async (m, c) => {
   function leadership(b) {
     b.innerHTML = `${canEdit ? '<div class="acts"><button class="btn" id="ad">إضافة قيادي</button></div>' : ""}<div class="tw mt"><table><thead><tr><th>الاسم</th><th>المنصب</th><th>من</th><th>إلى</th><th></th></tr></thead><tbody>${lead.map((l) =>
       `<tr><td>${esc(l.staff_members?.full_name)}</td><td>${esc(l.position)}</td><td>${fmt(l.started_on)}</td><td>${l.ended_on ? fmt(l.ended_on) : '<span class="badge ok">قائم</span>'}</td><td>${canEdit && !l.ended_on ? `<button class="btn sm sec" data-e="${l.id}">إنهاء</button>` : ""}</td></tr>`).join("") || '<tr><td colspan="5">لم تُسجَّل القيادة بعد.</td></tr>'}</tbody></table></div>
-      <p class="sub">القيادة مرتبطة بسجل المنسوبين بالمعرّف الثابت، فلا تتكرر البيانات.</p>`;
+      <p class="sub">القيادة مرتبطة بالمنسوبين بالمعرّف الثابت، فلا تتكرر البيانات.</p>`;
     b.querySelectorAll("[data-e]").forEach((x) => (x.onclick = async () => { await sb.from("school_leadership").update({ ended_on: today() }).eq("id", x.dataset.e); rerun(); }));
     if (!canEdit) return;
     b.querySelector("#ad").onclick = () => {

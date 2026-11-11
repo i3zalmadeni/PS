@@ -1,6 +1,6 @@
 const CAT_AR2 = { teaching: "الهيئة التعليمية", administrative: "الهيئة الإدارية", support: "الهيئة المساندة" };
 boot("staff.html", async (m, c) => {
-  // سجل المنسوبين: عرض فقط للمنسوبين المعتمدين العاملين حالياً (على رأس العمل أو في إجازة). كل التعديل من «المستخدمون والصلاحيات».
+  // المنسوبون: عرض فقط للمنسوبين المعتمدين العاملين حالياً (على رأس العمل أو في إجازة). كل التعديل من «المستخدمون والصلاحيات».
   if (!(c.can("personnel:view") || c.can("users:manage"))) { location.replace("dashboard.html"); return; }
   const cats = await sb.from("staff_categories").select("*").order("sort_order"), C = cats.data || [];
   const canContact = c.can("personnel_contact:view") || c.can("personnel:edit") || c.can("users:manage");
@@ -8,7 +8,7 @@ boot("staff.html", async (m, c) => {
   const r0 = await sb.from("staff_members").select("*,job_titles(name_ar),staff_categories(name_ar)").eq("is_active", true).order("full_name"); rows = r0.data || [];
   if (canContact) { const p = await sb.from("staff_private").select("staff_id,employee_no,email,phone"); priv = Object.fromEntries((p.data || []).map((x) => [x.staff_id, x])); }
   const LIVE_L = { active: L.emp.active, on_leave: L.emp.on_leave };
-  m.innerHTML = head("سجل المنسوبين", "المنسوبون المعتمدون العاملون في المدرسة حالياً، للاطلاع فقط") +
+  m.innerHTML = head("المنسوبون", "المنسوبون المعتمدون العاملون في المدرسة حالياً، للاطلاع فقط") +
     `<div class="bar"><input id="q" placeholder="بحث بالاسم أو التخصص أو القسم"><select id="fc"><option value="">كل الفئات</option>${C.map((x) => `<option value="${x.code}">${esc(x.name_ar)}</option>`).join("")}</select>
      <select id="fe"><option value="">كل الحالات</option>${opts(LIVE_L)}</select><button class="btn sec" id="ex">تصدير Excel</button><button class="btn sec" id="hs">سجل التغييرات</button>${c.can("users:manage") ? '<a class="btn" href="access.html">إدارة المستخدمين</a>' : ""}</div>
      <div class="tw"><table><thead><tr><th>الاسم</th><th>الفئة</th><th>المسمى</th><th>التخصص</th><th>القسم</th><th>الحالة</th><th></th></tr></thead><tbody id="tb"></tbody></table></div><p class="sub" id="cnt"></p>`;
@@ -32,7 +32,7 @@ boot("staff.html", async (m, c) => {
     md.el.querySelector("#cx").onclick = md.close; md.el.querySelector("#h").onclick = () => showHistory("staff_members", r.id, r.full_name);
   }
   ["q", "fc", "fe"].forEach((i) => m.querySelector("#" + i).addEventListener("input", draw)); draw();
-  m.querySelector("#hs").onclick = () => showHistory("staff_members", null, "سجل المنسوبين");
+  m.querySelector("#hs").onclick = () => showHistory("staff_members", null, "المنسوبون");
   m.querySelector("#ex").onclick = () => exportXlsx("سجل-المنسوبين", ["الاسم", "الفئة", "المسمى", "التخصص", "المؤهل", "القسم", "الحالة الوظيفية", "تاريخ الانضمام", ...(canContact ? ["الرقم الوظيفي", "البريد", "الجوال"] : [])],
     filtered().map((r) => [r.full_name, r.staff_categories?.name_ar, r.job_titles?.name_ar, r.specialty, r.qualification, r.department, L.emp[r.employment_status], r.joined_on, ...(canContact ? [priv[r.id]?.employee_no, priv[r.id]?.email, priv[r.id]?.phone] : [])]));
   m.addEventListener("click", (e) => { const b = e.target.closest("button[data-d]"); if (b) details(rows.find((x) => x.id === b.dataset.d)); });

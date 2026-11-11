@@ -7,13 +7,13 @@ boot("facilities.html", async (m, c) => {
   await load();
   const filtered = () => { const q = m.querySelector("#q").value.trim(), t = m.querySelector("#ftp").value, s = m.querySelector("#fst").value; return rows.filter((r) => (!q || r.name.includes(q) || (r.building || "").includes(q) || (r.code || "").includes(q)) && (!t || r.type_code === t) && (!s || r.status === s)); };
   function paint() {
-    m.innerHTML = head("سجل المرافق", "الهوية الثابتة للمرافق ومواقعها والمسؤولون عنها وتجهيزاتها، دون الحجوزات والصيانة") +
+    m.innerHTML = head("المرافق", "الهوية الثابتة للمرافق ومواقعها والمسؤولون عنها وتجهيزاتها، دون الحجوزات والصيانة") +
       `<div class="bar"><input id="q" placeholder="بحث بالاسم أو المبنى أو الرمز"><select id="ftp"><option value="">كل الأنواع</option>${FT.map((t) => `<option value="${t.code}">${esc(t.name_ar)}</option>`).join("")}</select><select id="fst"><option value="">كل الحالات</option>${opts(L.fstatus)}</select>
        ${canAdd ? '<button class="btn" id="add">إضافة مرفق</button><button class="btn sec" id="imp">استيراد Excel</button>' : ""}<button class="btn sec" id="ex">تصدير Excel</button><button class="btn sec" id="hs">سجل التغييرات</button></div>
       <div id="impbox"></div><div class="tw"><table><thead><tr><th>الرمز</th><th>الاسم</th><th>النوع</th><th>الموقع</th><th>الطاقة</th><th>الحالة</th><th></th></tr></thead><tbody id="tb"></tbody></table></div><p class="sub" id="cnt"></p>`;
     ["q", "ftp", "fst"].forEach((i) => m.querySelector("#" + i).addEventListener("input", draw));
     if (canAdd) { m.querySelector("#add").onclick = () => form(null); m.querySelector("#imp").onclick = openImport; }
-    m.querySelector("#hs").onclick = () => showHistory("facilities", null, "سجل المرافق");
+    m.querySelector("#hs").onclick = () => showHistory("facilities", null, "المرافق");
     m.querySelector("#ex").onclick = () => exportXlsx("سجل-المرافق", ["الرمز", "الاسم", "النوع", "المبنى", "الدور", "الغرفة", "المساحة", "الطاقة", "الحالة", "المسؤول الرئيسي", "المسؤول البديل"], filtered().map((r) => [r.code, r.name, FN_[r.type_code], r.building, r.floor, r.room_no, r.area_m2, r.capacity, L.fstatus[r.status], SN[r.primary_staff_id], SN[r.backup_staff_id]]));
     m.querySelector("#tb").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; const r = rows.find((x) => x.id === b.dataset.id); b.dataset.k === "d" ? details(r) : form(r); };
     draw();
@@ -77,7 +77,7 @@ boot("facilities.html", async (m, c) => {
       plan: (get, cx, seen) => {
         const errs = [], name = String(get("name")).trim(), t = tBy(String(get("type")).trim()), b = nn(String(get("building"))), rn = nn(String(get("room_no"))), key = [name, b || "", rn || ""].join("|");
         const p1 = String(get("primary")).trim(), p2 = String(get("backup")).trim(), s1 = p1 && sBy(p1), s2 = p2 && sBy(p2);
-        if (name.length < 2) errs.push("الاسم مطلوب"); if (!t) errs.push("نوع غير معروف"); if (p1 && !s1) errs.push("المسؤول الرئيسي غير موجود في سجل المنسوبين"); if (p2 && !s2) errs.push("المسؤول البديل غير موجود في سجل المنسوبين"); if (s1 && s2 && s1.id === s2.id) errs.push("الرئيسي والبديل متطابقان");
+        if (name.length < 2) errs.push("الاسم مطلوب"); if (!t) errs.push("نوع غير معروف"); if (p1 && !s1) errs.push("المسؤول الرئيسي غير موجود في المنسوبون"); if (p2 && !s2) errs.push("المسؤول البديل غير موجود في المنسوبون"); if (s1 && s2 && s1.id === s2.id) errs.push("الرئيسي والبديل متطابقان");
         if (seen.has(key)) errs.push("مكرر داخل الملف"); seen.add(key);
         return { errs, mid: cx.ex.find((x) => x.k === key)?.id, name, rec: { name, type_code: t?.code, building: b, floor: nn(String(get("floor"))), room_no: rn, area_m2: num(get("area")), capacity: num(get("capacity")), primary_staff_id: s1?.id || null, backup_staff_id: s2?.id || null } };
       },

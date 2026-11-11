@@ -17,7 +17,7 @@ boot("access.html", async (m, c) => {
   await load();
   const label = (r) => `${R[r.role_code]?.name_ar || r.role_code}${r.system_code ? " · " + (SY[r.system_code] || r.system_code) : ""}`;
   function paint() {
-    m.innerHTML = head("المستخدمون والصلاحيات", "كل تعديل على المستخدمين من هنا: البيانات والحالة والحساب والأدوار والصلاحيات. أما «سجل المنسوبين» فيعرض العاملين الحاليين دون تعديل.") +
+    m.innerHTML = head("المستخدمون والصلاحيات", "كل تعديل على المستخدمين من هنا: البيانات والحالة والحساب والأدوار والصلاحيات. أما «المنسوبون» فيعرض العاملين الحاليين دون تعديل.") +
       `<div class="bar"><input id="q" placeholder="بحث بالاسم أو التخصص أو القسم"><select id="fc"><option value="">كل الفئات</option>${C.map((x) => `<option value="${x.code}">${esc(x.name_ar)}</option>`).join("")}</select>
        <select id="fe"><option value="">كل الحالات</option><option value="_live">فعّالون (على رأس العمل / في إجازة)</option><option value="_off">غير فعّالين (منقول / منتهٍ / متقاعد / مؤرشف)</option>${opts(L.emp)}</select>
        <select id="fa"><option value="">كل الحسابات</option>${opts(L.acct)}</select>
@@ -37,7 +37,7 @@ boot("access.html", async (m, c) => {
   async function setStatus(r, v, el) {
     if (!r || v === r.employment_status) return;
     const off = !LIVE.includes(v);
-    if (off && LIVE.includes(r.employment_status) && !confirm(`تغيير حالة «${r.full_name}» إلى «${L.emp[v]}»؟ سيختفي من سجل المنسوبين ومن الموقع العام.`)) { el.value = r.employment_status; return; }
+    if (off && LIVE.includes(r.employment_status) && !confirm(`تغيير حالة «${r.full_name}» إلى «${L.emp[v]}»؟ سيختفي من المنسوبين ومن الموقع العام.`)) { el.value = r.employment_status; return; }
     const res = await sb.from("staff_members").update({ employment_status: v }).eq("id", r.id);
     if (res.error) { toast(mapErr(res.error), true); el.value = r.employment_status; return; }
     toast("تم تحديث الحالة"); await load(); draw();

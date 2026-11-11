@@ -18,8 +18,8 @@ boot("students.html", async (m, c) => {
     return rows.filter((r) => (!q || r.full_name.includes(q) || (r.student_no || "").includes(q)) && (!g || r.grade_code === g) && (!s || r.section_id === s) && (!st || r.study_status === st));
   }
   function paint() {
-    m.innerHTML = head("سجل المتعلمين", "الهوية الثابتة للمتعلم، وتسجيله في كل عام دراسي دون حذف التاريخ") +
-      (cur ? "" : '<div class="alert">لا يوجد عام دراسي حالي، فلا يمكن تسجيل المتعلمين قبل إنشائه من سجل المدرسة.</div>') +
+    m.innerHTML = head("المتعلمون", "الهوية الثابتة للمتعلم، وتسجيله في كل عام دراسي دون حذف التاريخ") +
+      (cur ? "" : '<div class="alert">لا يوجد عام دراسي حالي، فلا يمكن تسجيل المتعلمين قبل إنشائه من صفحة المدرسة.</div>') +
       `<div class="bar"><input id="q" placeholder="بحث بالاسم أو رقم الطالب"><select id="fy">${Y.map((y) => `<option value="${y.id}" ${y.id === yearId ? "selected" : ""}>${esc(y.name)} (${L.year[y.status]})</option>`).join("")}</select>
         <select id="fg"><option value="">كل المراحل</option>${G.map((g) => `<option value="${g.code}">${esc(g.name_ar)}</option>`).join("")}</select>
         <select id="fs"><option value="">كل الفصول</option>${S.filter((s) => s.year_id === yearId).map((s) => `<option value="${s.id}">${esc(GN[s.grade_code] || "")} - ${esc(s.name)}</option>`).join("")}</select>
@@ -29,7 +29,7 @@ boot("students.html", async (m, c) => {
     ["q", "fg", "fs", "ft"].forEach((i) => m.querySelector("#" + i).addEventListener("input", draw));
     m.querySelector("#fy").onchange = async (e) => { yearId = e.target.value; await load(); paint(); };
     if (m.querySelector("#add")) { m.querySelector("#add").onclick = () => form(null); m.querySelector("#imp").onclick = openImport; }
-    m.querySelector("#hs").onclick = () => showHistory("students", null, "سجل المتعلمين");
+    m.querySelector("#hs").onclick = () => showHistory("students", null, "المتعلمون");
     m.querySelector("#ex").onclick = () => exportXlsx("سجل-المتعلمين", ["رقم الطالب", "الاسم", "المرحلة", "الفصل", "الحالة الدراسية", "الجنسية", "تاريخ الميلاد"], filtered().map((r) => [r.student_no, r.full_name, GN[r.grade_code], SN[r.section_id], L.stu[r.study_status], r.nationality, r.birth_date]));
     m.querySelector("#tb").onclick = (e) => { const b = e.target.closest("button"); if (!b) return; const r = rows.find((x) => x.id === b.dataset.id); b.dataset.k === "d" ? details(r) : form(r); };
     draw();

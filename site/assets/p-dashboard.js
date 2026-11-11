@@ -24,8 +24,8 @@ boot("dashboard.html", async (m, c) => {
     <h3 class="sec">بيانات المدرسة</h3><div class="card"><div class="fg">
       ${[["الرقم الوزاري", p.ministry_no], ["المرحلة", p.stage], ["نوع المدرسة", [p.school_type, L.gender[p.gender]].filter(Boolean).join(" · ")], ["الإدارة التعليمية", p.education_department], ["مكتب التعليم", p.education_office], ["الموقع", [p.city, p.district].filter(Boolean).join("، ")]].map(([k, v]) => `<div><small class="sub">${k}</small><br><b>${esc(v || "—")}</b></div>`).join("")}</div></div>
     <h3 class="sec">السجلات الأربعة</h3><div class="grid">
-      ${reg("school.html", IC.school, 0, "سجل المدرسة", "الملف المركزي والقيادة والأعوام والمراحل والفصول.")}
-      ${reg("staff.html", IC.users, 3, "سجل المنسوبين", "الهيئة التعليمية والإدارية والمساندة.")}
-      ${c.can("students:view") ? reg("students.html", IC.cap, 1, "سجل المتعلمين", "الهوية والتسجيل لكل عام وأولياء الأمور.") : ""}
-      ${reg("facilities.html", IC.building, 4, "سجل المرافق", "الهوية الثابتة والموقع والمسؤولون والتجهيزات.")}</div>`;
+      ${reg("school.html", IC.school, 0, "المدرسة", "الملف المركزي والقيادة والأعوام والمراحل والفصول.")}
+      ${reg("staff.html", IC.users, 3, "المنسوبون", "الهيئة التعليمية والإدارية والمساندة.")}
+      ${c.can("students:view") ? reg("students.html", IC.cap, 1, "المتعلمون", "الهوية والتسجيل لكل عام وأولياء الأمور.") : ""}
+      ${reg("facilities.html", IC.building, 4, "المرافق", "الهوية الثابتة والموقع والمسؤولون والتجهيزات.")}</div>`;
 });
