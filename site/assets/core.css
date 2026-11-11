@@ -4,7 +4,7 @@
 --brand:#0f8a94;--brand2:#0c6f82;--brandsoft:#e3f6f7;--ok:#1f9d63;--info:#2f6fc4;--bad:#d23f4f;--warn:#c27a12;
 --gold:#f0b34a;--gold2:#d9a441;--goldink:#a97b1f;--acc2:#f0a530;--acc2soft:#fff4e0;
 --navy:#17414f;--navy2:#0f2f3b;--navy3:#215463;
---grad:linear-gradient(135deg,#18a4ab,#0c6f82);
+--grad:linear-gradient(135deg,#18a4ab,#0c6f82);--hv:linear-gradient(135deg,#18a4ab 0%,#0c6f82 60%,#2f7388 100%);--acc2ink:#a35f0a;
 --herobg:linear-gradient(135deg,#4c9ea3 0%,#2f6f84 42%,#3a7a79 72%,#6f9b6f 100%);
 --hdrbg:#fff;--moe:#07a869;--moe2:#0da9a6;--moenavy:#15445a;
 --stripe:#07a869;
