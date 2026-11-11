@@ -661,3 +661,20 @@ header nav a{position:relative}header nav a::after{content:"";position:absolute;
 @media (max-width:820px){.pans{flex-direction:column;height:auto}.pan{min-height:190px}.pans:hover .pan,.pans .pan:hover{flex:1}.pan .pd{max-height:80px;opacity:.92}}
 @media (prefers-reduced-motion:reduce){.rb-track{animation:none}.hcore,.hr,.hg{animation:none}}
 .hero3.hl .h3t{translate:none}.hero3.hl{padding-block:44px}
+/* ===== بيانات المدرسة: بطاقة الهوية والإشغال ===== */
+.dnb{margin:6px 0 4px}
+.idc{border-radius:28px;overflow:hidden;background:#fff;box-shadow:var(--shadow2);border:1px solid var(--line)}
+.idc-m{display:flex;align-items:center;gap:22px;padding:28px 30px;color:#fff;background:linear-gradient(135deg,#4c9ea3,#2f7388 55%,#3a7a79);position:relative;overflow:hidden}
+.idc-m::after{content:"";position:absolute;inset:-60px auto auto -60px;width:240px;height:240px;border-radius:50%;background:radial-gradient(closest-side,rgba(246,194,94,.35),transparent)}
+.idc-e{position:relative;z-index:1;flex:none;width:92px;height:92px;filter:drop-shadow(0 10px 18px rgba(6,40,52,.35));animation:flt 7s ease-in-out infinite}.idc-e .core-ic{width:100%;height:100%}
+.idc-m>div{position:relative;z-index:1}.idc-m small{color:#d4eef0;font-weight:700}.idc-m h3{margin:2px 0 10px;font-size:clamp(1.5rem,3vw,2.2rem)}
+.idc-t{display:flex;flex-wrap:wrap;gap:8px}.idc-t span{background:rgba(255,255,255,.18);padding:4px 14px;border-radius:99px;font-weight:700;font-size:.88rem}
+.idc-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+.idc-c{display:flex;flex-direction:column;gap:4px;padding:20px 24px;text-decoration:none;color:var(--ink);border-inline-start:1px solid var(--line);transition:background .3s,transform .3s}.idc-c:first-child{border-inline-start:0}
+a.idc-c:hover{background:var(--acc2soft)}
+.idc-c>span{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:var(--acc2soft);margin-bottom:6px}.idc-c .ico{width:20px;height:20px;stroke:var(--brand2)}
+.idc-c small{color:var(--ink2);font-weight:600}.idc-c b{overflow-wrap:anywhere}
+.occ{display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap}.occ-b{flex:1;min-width:200px;height:12px;border-radius:99px;background:var(--line);overflow:hidden}
+.occ-b i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#0f8a94,#f0b34a);transform-origin:right;animation:occ 1.4s cubic-bezier(.2,.7,.2,1) both}@keyframes occ{from{transform:scaleX(0)}}
+.occ span{color:var(--ink2);font-weight:600}.occ b{color:var(--brand2);font-size:1.2rem}
+@media (max-width:640px){.idc-m{flex-direction:column;text-align:center}.idc-c{border-inline-start:0;border-top:1px solid var(--line)}}
