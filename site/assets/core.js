@@ -1,4 +1,9 @@
 const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey);
+async function doLogout(to) {
+  try { await Promise.race([sb.auth.signOut({ scope: "local" }), new Promise((r) => setTimeout(r, 2500))]); } catch (_) {}
+  try { Object.keys(localStorage).filter((k) => /^sb-.*-auth-token/.test(k)).forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); } catch (_) {}
+  location.replace(to || "login.html");
+}
 const FN = APP_CONFIG.supabaseUrl + "/functions/v1/core-api";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const qs = (k) => new URLSearchParams(location.search).get(k);
@@ -89,11 +94,11 @@ async function boot(page, render, o = {}) {
     const msg = /permission denied|row-level security/i.test(err?.message || "") ? "لا تملك حسابك صلاحية قراءة بياناتك من النواة. تواصل مع مدير النظام." : "تعذر الاتصال بالخادم أو التحقق من حسابك.";
     document.getElementById("shell").innerHTML = `<main class="wrap"><div class="card" style="max-width:520px;margin:48px auto"><h3 style="margin-top:0">تعذر فتح لوحة التحكم</h3><p class="err">${esc(msg)}</p><div class="acts mt"><button class="btn" id="rt">إعادة المحاولة</button><button class="btn sec" id="lo">تسجيل الخروج</button></div></div></main>`;
     document.getElementById("rt").onclick = () => location.reload();
-    document.getElementById("lo").onclick = async () => { await sb.auth.signOut(); location.replace("login.html"); };
+    document.getElementById("lo").onclick = () => doLogout();
   };
   const { data: me, error: meErr } = await sb.from("staff_members").select("id,full_name,category,job_title").eq("user_id", session.user.id).maybeSingle();
   if (meErr) { fail(meErr); return; }
-  if (!me) { await sb.auth.signOut(); location.replace("login.html?e=nostaff"); return; }
+  if (!me) { await doLogout("login.html?e=nostaff"); return; }
   const { data: adm, error: admErr } = await sb.rpc("is_core_admin"); if (admErr) { fail(admErr); return; } const isAdmin = adm === true;
   const { data: pr, error: prErr } = await sb.from("staff_permissions").select("permission_code").eq("staff_id", me.id); if (prErr) { fail(prErr); return; }
   const have = new Set((pr || []).map((x) => x.permission_code));
@@ -108,7 +113,7 @@ async function boot(page, render, o = {}) {
     `<header><div class="wrap top">${brandHTML("dashboard.html")}<button class="navtoggle" aria-label="القائمة" aria-expanded="false">${ico("menu")}</button>
      <nav><a href="index.html">الموقع</a><a href="data.html">بيانات المدرسة</a><a href="dashboard.html" class="on">لوحة التحكم</a></nav><span class="who">${ico("user")}${esc(me.full_name)}</span>${headMoe}<a class="loginbtn" href="#" id="out">خروج</a></div>
      <div class="dnav"><div class="wrap"><div class="dnav-in">${items.map(([h, n, e, t, , bd]) => `<a href="${h}" title="${esc(t)}" class="${h === page ? "on" : ""}" ${h === page ? 'aria-current="page"' : ""}>${ico(e)}${n}${bd ? `<span class="bdg" data-b="${bd}"></span>` : ""}</a>`).join("")}</div></div></div></header><main class="wrap" id="main"></main>${footerHTML}`; bindNav();
-  document.getElementById("out").onclick = async (e) => { e.preventDefault(); await sb.auth.signOut(); location.replace("login.html"); };
+  document.getElementById("out").onclick = (e) => { e.preventDefault(); doLogout(); };
   sb.rpc("school_stats").then(({ data }) => { if (data) document.querySelectorAll("[data-b]").forEach((e) => { const v = data[e.dataset.b]; if (v !== undefined) e.textContent = v; }); });
   const main = document.getElementById("main");
   try { await render(main, ctx); } catch (e) { console.error(e); main.innerHTML = '<p class="err">تعذر تحميل الصفحة.</p>'; }
