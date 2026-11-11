@@ -144,13 +144,20 @@ async function adminRoute(req: Request, path: string) {
   if (req.method !== "POST") return json({ error: "method_not_allowed" }, 405);
   const auth = req.headers.get("authorization") ?? "";
   const caller = createClient(URL_, ANON, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
-  const { data: ok } = await caller.rpc("is_core_admin");
-  if (ok !== true) return json({ error: "forbidden" }, 403);
+  // مدير النواة، أو صاحب صلاحية «إدارة المستخدمين الكاملة» (users:manage)
+  const [adm, mgr] = await Promise.all([caller.rpc("is_core_admin"), caller.rpc("core_can", { p: "users:manage" })]);
+  const callerIsAdmin = adm.data === true;
+  if (!callerIsAdmin && mgr.data !== true) return json({ error: "forbidden" }, 403);
   const body = await req.json().catch(() => ({}));
   const staffId = String(body.staff_id ?? "");
   if (!UUID.test(staffId)) return json({ error: "invalid_staff_id" }, 400);
   const { data: s } = await db.from("staff_members").select("id,user_id").eq("id", staffId).maybeSingle();
   if (!s) return json({ error: "staff_not_found" }, 404);
+  // حساب مدير النواة/المدرسة محمي: لا يعدّله إلا مدير النواة
+  if (!callerIsAdmin) {
+    const { data: prot } = await db.from("staff_roles").select("id").eq("staff_id", staffId).in("role_code", ["core_admin", "principal"]).is("ended_on", null).limit(1);
+    if (prot?.length) return json({ error: "admin_protected" }, 403);
+  }
 
   if (path === "/admin/create-account") {
     if (s.user_id) return json({ error: "account_exists" }, 409);

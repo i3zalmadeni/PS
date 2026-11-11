@@ -6,7 +6,7 @@ const fmt = (d) => (d ? new Date(d).toLocaleDateString("ar-SA-u-nu-latn", { year
 const fmtT = (d) => (d ? new Date(d).toLocaleString("ar-SA-u-nu-latn", { dateStyle: "medium", timeStyle: "short" }) : "—");
 const L = {
   acct: { none: "بلا حساب", invited: "مدعو", active: "نشط", suspended: "موقوف" },
-  emp: { active: "على رأس العمل", on_leave: "في إجازة", transferred: "منقول", ended: "منتهية خدمته" },
+  emp: { active: "على رأس العمل", on_leave: "في إجازة", transferred: "منقول", ended: "منتهية خدمته", retired: "متقاعد", archived: "مؤرشف" },
   stu: { enrolled: "منتظم", transferred_out: "منقول", graduated: "متخرج", withdrawn: "منسحب" },
   etype: { new: "مستجد", transfer_in: "منقول إلينا", returning: "عائد" },
   fstatus: { operational: "يعمل", limited: "جزئي", closed: "مغلق" },
@@ -49,7 +49,7 @@ function mapErr(e) {
 async function api(path, body) {
   const { data: { session } } = await sb.auth.getSession();
   const r = await fetch(FN + path, { method: "POST", headers: { "content-type": "application/json", authorization: "Bearer " + session.access_token, apikey: APP_CONFIG.supabaseKey }, body: JSON.stringify(body) });
-  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", invalid_login_id: "المعرّف من 3 إلى 40 خانة: أرقام أو حروف إنجليزية، ويمكن استخدام . _ -", login_id_taken: "هذا المعرّف مستخدم لحساب آخر", email_taken: "هذا البريد مستخدم لحساب آخر", email_required: "لا يمكن حذف بريد حساب يدخل بالبريد؛ حوّله إلى معرّف أولاً", no_account: "لا حساب لهذا المنسوب", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(({ account_exists: "للمنسوب حساب بالفعل", password_too_short: "كلمة المرور أقصر من 10 أحرف", invalid_email: "بريد غير صالح", invalid_login_id: "المعرّف من 3 إلى 40 خانة: أرقام أو حروف إنجليزية، ويمكن استخدام . _ -", login_id_taken: "هذا المعرّف مستخدم لحساب آخر", email_taken: "هذا البريد مستخدم لحساب آخر", email_required: "لا يمكن حذف بريد حساب يدخل بالبريد؛ حوّله إلى معرّف أولاً", no_account: "لا حساب لهذا المنسوب", admin_protected: "هذا حساب محمي: يعدّله مدير النواة فقط", forbidden: "غير مصرح" })[j.error] || j.error || "فشل الطلب"); return j;
 }
 
 // تصدير جدول إلى Excel
@@ -77,9 +77,9 @@ async function showHistory(table, id, title) {
   md.el.querySelector("#cx").onclick = md.close;
 }
 
-const NAV = [["dashboard.html", "الرئيسية", "home", "ملخص النواة والأعداد المحسوبة"], ["school.html", "سجل المدرسة", "school", "الملف والقيادة والأعوام والمراحل والفصول"], ["staff.html", "سجل المنسوبين", "users", "الهيئة التعليمية والإدارية والمساندة", null, "personnel_total"],
+const NAV = [["dashboard.html", "الرئيسية", "home", "ملخص النواة والأعداد المحسوبة"], ["school.html", "سجل المدرسة", "school", "الملف والقيادة والأعوام والمراحل والفصول"], ["staff.html", "سجل المنسوبين", "users", "المنسوبون العاملون حالياً (عرض فقط)", null, "personnel_total"],
   ["students.html", "سجل المتعلمين", "cap", "الهوية والتسجيل لكل عام", "students:view", "students_total"], ["facilities.html", "سجل المرافق", "building", "الموقع والمسؤولون والتجهيزات", null, "facilities_total"],
-  ["access.html", "المستخدمون والصلاحيات", "lock", "الأدوار والصلاحيات", "admin"], ["settings.html", "إعدادات النواة والتكامل", "gear", "الأنظمة والمفاتيح والسجلات", "admin"]];
+  ["access.html", "المستخدمون والصلاحيات", "lock", "تعديل بيانات المستخدمين وحالاتهم وحساباتهم وصلاحياتهم", "users:manage"], ["settings.html", "إعدادات النواة والتكامل", "gear", "الأنظمة والمفاتيح والسجلات", "admin"]];
 async function boot(page, render, o = {}) {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) { location.replace("login.html"); return; }
