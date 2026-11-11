@@ -2,7 +2,7 @@ const sb = supabase.createClient(APP_CONFIG.supabaseUrl, APP_CONFIG.supabaseKey)
 async function doLogout(to) {
   try { await Promise.race([sb.auth.signOut({ scope: "local" }), new Promise((r) => setTimeout(r, 2500))]); } catch (_) {}
   try { Object.keys(localStorage).filter((k) => /^sb-.*-auth-token/.test(k)).forEach((k) => localStorage.removeItem(k)); sessionStorage.clear(); } catch (_) {}
-  location.replace(to || "login.html");
+  location.replace(to || "index.html");
 }
 const FN = APP_CONFIG.supabaseUrl + "/functions/v1/core-api";
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
