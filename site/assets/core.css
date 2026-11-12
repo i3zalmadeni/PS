@@ -854,8 +854,11 @@ a.sys:hover .sy-go{transform:translateX(-4px)}
 
 /* بطاقات الأنظمة في الصفحة الرئيسية (بتصميم البطاقات المتمددة) */
 .pans.sysp{height:400px}
-.sysp .pan:nth-child(4){background:linear-gradient(160deg,#5a8f9a,#2c5f6e)}
-.sysp .pan:nth-child(5){background:linear-gradient(160deg,#b48a45,#7a5a26)}
+/* ثلاث منصات في كل صف: الصف الثاني يأخذ ألوانه الخاصة */
+.pans.sysp+.pans.sysp{margin-top:14px}
+.sysp2 .pan:nth-child(1){background:linear-gradient(160deg,#5a8f9a,#2c5f6e)}
+.sysp2 .pan:nth-child(2){background:linear-gradient(160deg,#b48a45,#7a5a26)}
+.sysp2 .pan:nth-child(3){background:linear-gradient(160deg,#18a4ab,#0c6f82)}
 .sysp .pan.soon{cursor:default}
 .sysp .pan .ps{min-height:0}
 .sysp .pan .pd{max-height:0}
