@@ -79,7 +79,7 @@ boot("access.html", async (m, c) => {
       <div><label>الحالة الوظيفية</label><select name="employment_status">${opts(L.emp, r?.employment_status || "active")}</select></div>
       <div><label>تاريخ الانضمام</label><input type="date" name="joined_on" value="${esc(r?.joined_on || today())}"></div>
       <div><label>الصورة (اختياري)</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp"></div>
-      <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} ${c.can("publish:manage") ? "" : "disabled"} style="width:auto"> إظهار الاسم والصورة والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)${c.can("publish:manage") ? "" : " <small class='sub'>— النشر من اختصاص مدير النواة أو منسق البوابة</small>"}</label></div>
+      <div class="full"><label class="chk"><input type="checkbox" name="publish_public" ${r?.publish_public ? "checked" : ""} ${c.isAdmin ? "" : "disabled"} style="width:auto"> إظهار الاسم والصورة والوظيفة والتخصص في الموقع العام (بموافقة المنسوب، دون أي بيانات تواصل)${c.isAdmin ? "" : " <small class='sub'>— النشر من اختصاص مدير النواة الرقمية</small>"}</label></div>
       ${canContact ? `<div><label>الرقم الوظيفي</label><input name="employee_no" value="${esc(p.employee_no)}"></div><div><label>البريد الإلكتروني</label><input type="email" name="email" value="${esc(p.email)}"${r?.user_id && !p.login_id ? " readonly title=\"بريد الدخول: يُغيَّر من نافذة الحساب\"" : ""}></div><div><label>الجوال</label><input name="phone" value="${esc(p.phone)}"></div>` : ""}
       </div><p class="err" id="fe2"></p><div class="acts mt"><button class="btn">حفظ</button><button type="button" class="btn sec" id="cx">إلغاء</button></div></form>`);
     const f = md.el.querySelector("#sf"), cat = f.category, jt = f.job_title;
@@ -88,7 +88,7 @@ boot("access.html", async (m, c) => {
     f.onsubmit = async (e) => {
       e.preventDefault(); const v = Object.fromEntries(new FormData(f)), err = md.el.querySelector("#fe2"); err.textContent = "";
       const id = r?.id || crypto.randomUUID();
-      const base = { full_name: v.full_name.trim(), category: v.category, job_title: v.job_title, specialty: nn(v.specialty), qualification: nn(v.qualification), department: nn(v.department), employment_status: v.employment_status, joined_on: v.joined_on || today() }; const canPub = c.can("publish:manage"); if (canPub) base.publish_public = f.publish_public.checked;
+      const base = { full_name: v.full_name.trim(), category: v.category, job_title: v.job_title, specialty: nn(v.specialty), qualification: nn(v.qualification), department: nn(v.department), employment_status: v.employment_status, joined_on: v.joined_on || today() }; const canPub = c.isAdmin; if (canPub) base.publish_public = f.publish_public.checked;
       try {
         const file = f.photo.files[0]; if (file) base.photo_path = await uploadMedia("personnel", id, file);
         // نسخة عامة من الصورة: لا تُنشأ إلا لمن فعّلت الإدارة نشره، وتُزال عند إلغاء النشر

@@ -3,7 +3,7 @@ const PFIELDS = [["official_name", "الاسم الرسمي *"], ["ministry_no",
   ["phone", "الهاتف"], ["email", "البريد الإلكتروني"], ["website", "الموقع الإلكتروني"], ["declared_capacity", "الطاقة الاستيعابية المعلنة (اتركها فارغة للحساب التلقائي)", "num"], ["notes", "ملاحظات", "area"], ["publish_public", "نشر ملخص المدرسة على الموقع العام (الأعداد والمرافق وبيانات المدرسة، دون أي بيانات شخصية)", "bool"]];
 
 boot("school.html", async (m, c) => {
-  const canPub = c.can("publish:manage"), canEdit = c.can("school:edit"), canCls = c.can("students:edit");
+  const canPub = c.isAdmin, canEdit = c.can("school:edit"), canCls = c.can("students:edit");
   let P = {}, years = [], lead = [], grades = [], sections = [], stats = [], staff = [], tab = location.hash === "#years" ? "years" : "profile";
   async function load() {
     const [a, b, d, e, f, g, h] = await Promise.all([sb.from("school_profile").select("*").maybeSingle(), sb.from("academic_years").select("*").order("created_at", { ascending: false }),
@@ -22,7 +22,7 @@ boot("school.html", async (m, c) => {
   const rerun = async () => { await load(); paint(); };
 
   function profile(b) {
-    const fld = ([k, l, t]) => t === "bool" ? `<div class="full"><label class="chk"><input type="checkbox" name="${k}" ${P[k] !== false ? "checked" : ""} ${canEdit && canPub ? "" : "disabled"} style="width:auto"> ${esc(l)}${canPub ? "" : " <small class='sub'>(من اختصاص مدير النواة أو منسق البوابة)</small>"}</label></div>` : `<div class="${t === "area" ? "full" : ""}"><label>${esc(l)}</label>${t === "gender" ? `<select name="${k}" ${canEdit ? "" : "disabled"}><option value="">—</option>${opts(L.gender, P[k])}</select>` : t === "area" ? `<textarea name="${k}" ${canEdit ? "" : "disabled"}>${esc(P[k])}</textarea>` : `<input name="${k}" ${t === "num" ? 'type="number" step="any"' : ""} value="${esc(P[k])}" ${canEdit ? "" : "disabled"}>`}</div>`;
+    const fld = ([k, l, t]) => t === "bool" ? `<div class="full"><label class="chk"><input type="checkbox" name="${k}" ${P[k] !== false ? "checked" : ""} ${canEdit && canPub ? "" : "disabled"} style="width:auto"> ${esc(l)}${canPub ? "" : " <small class='sub'>(من اختصاص مدير النواة الرقمية)</small>"}</label></div>` : `<div class="${t === "area" ? "full" : ""}"><label>${esc(l)}</label>${t === "gender" ? `<select name="${k}" ${canEdit ? "" : "disabled"}><option value="">—</option>${opts(L.gender, P[k])}</select>` : t === "area" ? `<textarea name="${k}" ${canEdit ? "" : "disabled"}>${esc(P[k])}</textarea>` : `<input name="${k}" ${t === "num" ? 'type="number" step="any"' : ""} value="${esc(P[k])}" ${canEdit ? "" : "disabled"}>`}</div>`;
     b.innerHTML = `<form id="pf" class="card"><div class="fg">${PFIELDS.map(fld).join("")}</div><p class="err" id="fe"></p><div class="acts mt">${canEdit ? '<button class="btn">حفظ</button>' : ""}<button type="button" class="btn sec" id="hs">سجل التغييرات</button><button type="button" class="btn sec" id="ex">تصدير Excel</button></div></form>`;
     b.querySelector("#hs").onclick = () => showHistory("school_profile", null, "بيانات المدرسة");
     b.querySelector("#ex").onclick = () => exportXlsx("سجل-المدرسة", PFIELDS.filter((f) => f[2] !== "bool").map((f) => f[1].replace(" *", "")), [PFIELDS.filter((f) => f[2] !== "bool").map((f) => P[f[0]] ?? "")]);
