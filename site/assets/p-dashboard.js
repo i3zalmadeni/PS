@@ -28,10 +28,10 @@ boot("dashboard.html", async (m, c) => {
       ${reg("staff.html", IC.users, 3, "المنسوبون", "الهيئة التعليمية والإدارية والمساندة.")}
       ${c.can("students:view") ? reg("students.html", IC.cap, 1, "المتعلمون", "الهوية والتسجيل لكل عام وأولياء الأمور.") : ""}
       ${reg("facilities.html", IC.building, 4, "المرافق", "الهوية الثابتة والموقع والمسؤولون والتجهيزات.")}</div>`;
-  if (c.isAdmin) { const host = document.createElement("div"); host.id = "pubpanel"; m.appendChild(host); publishPanel(host); }
+  if (c.can("publish:manage")) { const host = document.createElement("div"); host.id = "pubpanel"; m.appendChild(host); publishPanel(host); }
 });
 
-// النشر في الموقع العام (لمدير النواة): المفتاح العام للمدرسة + نشر المنسوبين فرداً أو جماعياً
+// النشر في الموقع العام (لمدير النواة ومنسق البوابة): المفتاح العام للمدرسة + نشر المنسوبين فرداً أو جماعياً
 async function publishPanel(host) {
   let P = {}, rows = [], q = "", flt = "all"; const sel = new Set();
   const load = async () => {
