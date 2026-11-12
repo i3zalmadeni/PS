@@ -3,7 +3,8 @@ boot("access.html", async (m, c) => {
   const [cats, titles, ro, pe, sy] = await Promise.all([sb.from("staff_categories").select("*").order("sort_order"), sb.from("job_titles").select("*").eq("is_active", true),
     sb.from("roles").select("*"), sb.from("permissions").select("*").order("code"), sb.rpc("system_names")]);
   const C = cats.data || [], T = titles.data || [];
-  const R = Object.fromEntries((ro.data || []).map((x) => [x.code, x])), PL = pe.data || [], P = Object.fromEntries(PL.map((x) => [x.code, x])), SY = Object.fromEntries((sy.data || []).map((x) => [x.code, x.name_ar]));
+  const R = Object.fromEntries((ro.data || []).map((x) => [x.code, x])), PL = pe.data || [], P = Object.fromEntries(PL.map((x) => [x.code, x])), SY = Object.fromEntries((sy.data || []).map((x) => [x.code, x.name_ar])),
+    SYA = Object.fromEntries((sy.data || []).filter((x) => x.status === "connected").map((x) => [x.code, x.name_ar])); // الأنظمة المفعّلة فقط (للإضافة الجديدة)
   const isCore = (p) => !p.system_code, canAdd = true, canEdit = true, canContact = true; // الصفحة كلها لإدارة المستخدمين
   const PROT = ["core_admin", "principal"], prot = (r) => (r.staff_roles || []).some((x) => !x.ended_on && PROT.includes(x.role_code));
   const lock = (r) => !c.isAdmin && prot(r); // حساب مدير النواة/المدرسة لا يعدّله إلا مدير النواة
@@ -164,10 +165,10 @@ boot("access.html", async (m, c) => {
     const act = (s.staff_roles || []).filter((r) => !r.ended_on), perms = s.staff_permissions || [];
     const md = modal(`<h3>الأدوار والصلاحيات: ${esc(s.full_name)}</h3><p><small>الوظيفة: ${esc(s.job_titles?.name_ar)} (لا تحدد الصلاحيات وحدها)</small></p>
       <h3 class="sec">الأدوار</h3>${act.map((r) => `<div class="row2 item"><span>${esc(label(r))}</span><button class="btn sm bad" data-er="${r.id}" ${!c.isAdmin && PROT.includes(r.role_code) ? "disabled" : ""}>إنهاء</button></div>`).join("") || '<p class="sub">لا توجد أدوار نشطة.</p>'}
-      <div class="fg mt"><div><label>الدور</label><select id="rc">${roleList.map((r) => `<option value="${r.code}">${esc(r.name_ar)}</option>`).join("")}</select></div><div><label>خاص بنظام</label><select id="rs"><option value="">النواة</option>${opts(SY)}</select></div></div><button class="btn mt" id="ar">إضافة الدور</button>
+      <div class="fg mt"><div><label>الدور</label><select id="rc">${roleList.map((r) => `<option value="${r.code}">${esc(r.name_ar)}</option>`).join("")}</select></div><div><label>خاص بنظام</label><select id="rs"><option value="">النواة</option>${opts(SYA)}</select></div></div><button class="btn mt" id="ar">إضافة الدور</button>
       <h3 class="sec">الصلاحيات الممنوحة</h3>${perms.map((p) => `<div class="row2 item"><span>${esc(P[p.permission_code]?.name_ar || p.permission_code)} <small>${P[p.permission_code]?.system_code ? esc(SY[P[p.permission_code].system_code] || "") : "النواة"}</small></span><button class="btn sm bad" data-rp="${esc(p.permission_code)}" ${!c.isAdmin && p.permission_code === "users:manage" ? "disabled" : ""}>سحب</button></div>`).join("") || '<p class="sub">لا توجد صلاحيات ممنوحة.</p>'}
       <div class="fg mt"><div class="full"><label>صلاحية على سجلات النواة</label><select id="pc">${pOpts(PL.filter(isCore))}</select></div></div><button class="btn mt" id="ap">منح صلاحية النواة</button>
-      <div class="fg mt"><div class="full"><label>صلاحية نظام مستقل</label><select id="pc2">${pOpts(PL.filter((p) => !isCore(p)))}</select></div></div><button class="btn mt" id="ap2">منح صلاحية النظام</button>
+      <div class="fg mt"><div class="full"><label>صلاحية نظام مستقل</label><select id="pc2">${pOpts(PL.filter((p) => !isCore(p) && SYA[p.system_code]))}</select></div></div><button class="btn mt" id="ap2">منح صلاحية النظام</button>
       <p class="err" id="fe"></p><div class="acts mt"><button class="btn sec" id="cx">إغلاق</button></div>`);
     const g = (i) => md.el.querySelector(i), done = async () => { md.close(); await load(); draw(); manage(rows.find((x) => x.id === s.id)); };
     g("#cx").onclick = md.close;
