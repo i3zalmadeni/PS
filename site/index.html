@@ -25,7 +25,7 @@ function fillCoords(K){
   const C=window.SYSTEM_COORDINATORS||{}; K=K||{};
   document.querySelectorAll("[data-coord]").forEach(e=>{
     const c=C[e.dataset.coord]; if(!c) return;
-    const a=K[COORD_KEY[e.dataset.coord]]||{}, nm=(a.name||"").trim(), ph=a.photo?PH({photo:a.photo}):"";
+    const a=K[COORD_KEY[e.dataset.coord]]||(e.dataset.coord!=="core"&&K._default)||{}, nm=(a.name||"").trim(), ph=a.photo?PH({photo:a.photo}):"";
     e.innerHTML=`<span class="cd-p"><b>${pesc(nm?nm[0]:"")}</b>${ph?`<img src="${ph}" alt="${pesc(nm)}" loading="lazy" onerror="this.remove()">`:""}</span><span class="cd-t"><small>${pesc(c.role||"منسق النظام")}</small><strong>${pesc(nm||"يُعلن قريباً")}</strong></span>`;
   });
 }
