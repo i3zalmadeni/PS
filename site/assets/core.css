@@ -859,6 +859,7 @@ a.sys:hover .sy-go{transform:translateX(-4px)}
 .sysp2 .pan:nth-child(1){background:linear-gradient(160deg,#5a8f9a,#2c5f6e)}
 .sysp2 .pan:nth-child(2){background:linear-gradient(160deg,#b48a45,#7a5a26)}
 .sysp2 .pan:nth-child(3){background:linear-gradient(160deg,#18a4ab,#0c6f82)}
+.sysp2 .pan:nth-child(4){background:linear-gradient(160deg,#3d5a80,#1f3354)}
 .sysp .pan.soon{cursor:default}
 .sysp .pan .ps{min-height:0}
 .sysp .pan .pd{max-height:0}
