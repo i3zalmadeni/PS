@@ -9,10 +9,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <script src="assets/chrome.js"></script><script src="assets/config.js"></script><script>
 pubInit("login.html");
-// صفحة الدخول الموحدة لأنظمة النواة الرقمية: النواة، التقويم الذاتي الذكي، مجتمع لبيد المهني.
+// صفحة الدخول الموحدة للبوابات الرقمية: حساب واحد عبر النواة لكل البوابات.
 // الأنظمة الثلاثة على الأصل نفسه (i3zalmadeni.github.io) وتستعمل قاعدة النواة نفسها، فتُشارَك الجلسة بينها تلقائياً.
 // next: النظام الذي طلب الدخول. لا يُقبل إلا أحد مسارات الأنظمة المعروفة (منعاً لإعادة التوجيه إلى مواقع أخرى).
-const SYSTEMS = [{ p: "/digital-core/", n: "النواة الرقمية" }, { p: "/self-evaluation/", n: "التقويم الذاتي الذكي" }, { p: "/teachers-community/", n: "مجتمع لبيد المهني" }, { p: "/facility-booking/", n: "احجز مرفق" }, { p: "/qiyami/", n: "قيمي" }, { p: "/indibati/", n: "انضباطي" }, { p: "/report/", n: "مرآة | الملف الشامل" }];
+const SYSTEMS = [{ p: "/digital-core/", n: "النواة الرقمية" }, { p: "/self-evaluation/", n: "التقويم المدرسي الذكي" }, { p: "/teachers-community/", n: "المجتمع المهني الذكي" }, { p: "/facility-booking/", n: "احجز مرفق" }, { p: "/qiyami/", n: "قيمي" }, { p: "/indibati/", n: "انضباطي" }, { p: "/report/", n: "مرآة | الملف الشامل" }];
 const safeNext = (raw) => {
   if (!raw) return null;
   try {
