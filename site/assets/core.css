@@ -986,6 +986,7 @@ button.wip-add{border:2px dashed rgba(90,58,6,.35);background:linear-gradient(16
 .intro-l:focus-visible{outline:3px solid #f6c25e;outline-offset:3px}
 .il-i{width:54px;height:54px;border-radius:16px;background:#fff;display:grid;place-items:center;flex:none}.il-i .ico{width:26px;height:26px;stroke:#0c6f82}
 .il-t{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}.il-t b{font-size:1.2rem}.il-t small{color:#ffd98a;font-weight:600}
-.il-a{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center;flex:none;transition:transform .3s}.il-a .ico{width:20px;height:20px;stroke:#fff}
-.intro-l:hover .il-a{transform:translateX(-6px)}
+.il-a{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#f6c25e,#eaa83a);display:grid;place-items:center;flex:none;transition:transform .15s,box-shadow .15s}.il-a .ico{width:20px;height:20px;stroke:#3b2a06}
+.intro-l:hover .il-a{transform:translateY(-2px);box-shadow:0 10px 22px rgba(240,179,74,.4)}
+#systems{margin-bottom:44px}
 .sc-facts dd a{display:inline-block;direction:ltr}

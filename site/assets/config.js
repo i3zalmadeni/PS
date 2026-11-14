@@ -26,4 +26,4 @@ window.SYSTEM_COORDINATORS = {
 window.SUGGEST_EMAIL = "";
 
 // رابط العرض التعريفي «مدرسة البيانات الذكية» في قسم «كيف بُنيت بواباتنا الرقمية؟» بالرئيسية. يُخفى الزر إن تُرك فارغاً.
-window.INTRO_URL = "https://claude.ai/artifact/2eoP5asqLPsUH6LzqkvmL2";
+window.INTRO_URL = "https://i3zalmadeni.github.io/smart-data-school/";
